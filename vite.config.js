@@ -1,19 +1,17 @@
 import { defineConfig } from 'vite';
-import tailwindcss from '@tailwindcss/vite';
 import laravel from 'laravel-vite-plugin';
 import { wordpressPlugin, wordpressThemeJson } from '@roots/vite-plugin';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import path from 'path';
 
 export default defineConfig({
-  base: '/wp-content/themes/anpro/public/build/',
+  base: '/wp-content/themes/ancutudo/public/build/',
   resolve: {
       alias: {
           '@': path.resolve(__dirname, 'resources'),
       },
   },
   plugins: [
-    tailwindcss(),
     laravel({
       input: [
         'resources/css/hgi-stroke-rounded.css',
@@ -28,13 +26,17 @@ export default defineConfig({
     }),
     wordpressPlugin(),
     wordpressThemeJson({
-      disableTailwindColors: false,
-      disableTailwindFonts: false,
-      disableTailwindFontSizes: false,
+      disableTailwindColors: true,
+      disableTailwindFonts: true,
+      disableTailwindFontSizes: true,
     }),
     viteStaticCopy({ targets: [
       { src: 'resources/images/*', dest: 'images' },
-      { src: 'resources/fonts/*', dest: 'fonts' }
+      { src: 'resources/fonts/*', dest: 'fonts' },
+      { 
+        src: 'node_modules/semantic-ui-css/themes/default/assets/fonts/*', 
+        dest: 'themes/default/assets/fonts' 
+      }
     ] })
   ],
 
