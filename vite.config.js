@@ -34,7 +34,7 @@ export default defineConfig({
       { src: 'resources/images/*', dest: 'images' },
       { src: 'resources/fonts/*', dest: 'fonts' },
       { 
-        src: 'node_modules/semantic-ui-css/themes/default/assets/fonts/*', 
+        src: 'node_modules/fomantic-ui-css/themes/default/assets/fonts/*',
         dest: 'themes/default/assets/fonts' 
       }
     ] })
