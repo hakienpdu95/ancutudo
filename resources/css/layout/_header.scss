@@ -1,0 +1,45 @@
+@use '../abstracts' as *;
+
+.sticky {
+    position: sticky;
+    top: 65px;
+}
+
+.header-wrap {
+    transition: min-height 0.25s ease;
+}
+
+.header-wrap-inner {
+	&.sticky {
+	    position: fixed;
+	    left: 0;
+	    top: 0;
+	    right: 0;
+	    min-width: 320px;
+	    background: #fff;
+	    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+	    z-index: 150;
+	    -webkit-animation: stuckMoveDown .6s;
+	    animation: stuckMoveDown .6s;
+	}
+}
+
+@-webkit-keyframes stuckMoveDown {
+    0% {
+        transform: translateY(-100%)
+    }
+
+    to {
+        transform: translateY(0)
+    }
+}
+
+@keyframes stuckMoveDown {
+    0% {
+        transform: translateY(-100%)
+    }
+
+    to {
+        transform: translateY(0)
+    }
+}
