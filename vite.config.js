@@ -17,8 +17,8 @@ export default defineConfig({
     laravel({
       input: [
         'resources/css/hgi-stroke-rounded.css',
-        'resources/css/app.css',      // Tailwind core
-        'resources/css/main.scss',    // Custom SCSS của bạn → main.{hash}.css
+        'resources/css/app.css',      
+        'resources/css/main.scss',    
         'resources/js/jquery.js',
         'resources/js/app.js',
         'resources/css/editor.css',
