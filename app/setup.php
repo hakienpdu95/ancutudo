@@ -544,13 +544,6 @@ add_filter('image_size_names_choose', function ($sizes) {
     ];
 });
 
-add_action('wp_head', function () {
-    echo '<style>';
-    echo '@font-face{font-family:"Roboto";font-style:normal;font-weight:400;src:url('.get_theme_file_uri('public/build/fonts/Roboto-Regular.woff2').') format("woff2");font-display:swap}';
-    echo '@font-face{font-family:"Roboto";font-style:normal;font-weight:500;src:url('.get_theme_file_uri('public/build/fonts/Roboto-Medium.woff2').') format("woff2");font-display:swap}';
-    echo '</style>';
-}, 1);
-
 add_action('admin_enqueue_scripts', function () {
     $screen = get_current_screen();
     if (!$screen || !in_array($screen->base, ['post', 'post-new'])) return;
