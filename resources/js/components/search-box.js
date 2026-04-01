@@ -23,6 +23,8 @@ function initial() {
 
     fetchCategories();
 
+    loadProvinces();
+
     $('.cs-search__imput').on('input', CommonModule.debounce(function () {
         getSuggestion($(this).val());
     }, 500));
@@ -72,16 +74,9 @@ function initial() {
         $('.cs-search-box__dropdown-panel--city').show();
     });
 
-    //Sự kiện mở danh sách quận huyện 
-    $('.cs-search-box__button.district-selection').click(function () {
-        if ($(this).is('.disabled') || $(this).is('.loading')) return;
-        $('.cs-search-box__dropdown-panel--main').hide();
-        $('.cs-search-box__dropdown-panel--district').show();
-    });
-
     //Sự kiện mở danh sách phường xã 
     $('.cs-search-box__button.ward-selection').click(function () {
-        if ($(this).is('.disabled') || $(this).is('.loading')) return;
+        if ($(this).hasClass('disabled')) return;
         $('.cs-search-box__dropdown-panel--main').hide();
         $('.cs-search-box__dropdown-panel--ward').show();
     });
@@ -90,102 +85,72 @@ function initial() {
     $('.cs-search-box__dropdown-panel .title svg').click(function () {
         $('.cs-search-box__dropdown-panel--main').show();
         $('.cs-search-box__dropdown-panel--city').hide();
-        $('.cs-search-box__dropdown-panel--district').hide();
         $('.cs-search-box__dropdown-panel--ward').hide();
     });
 
     //Chọn tỉnh thành
-    $('.cs-search-box__dropdown-panel--city .cs-search-box__dropdown-item .checkbox.radio').checkbox({
-        onChecked: function () {
-            let displayname = '';
-            if ($(this).val()) {
-                displayname = $(this).data("display-name");
-                $('.cs-search-box__button.district-selection').removeClass('disabled');
-                fetchDistricts($(this).val());
-            }
-            else {
-                $('.cs-search-box__button.district-selection').addClass('disabled');
-                $('.cs-search-box__button.ward-selection').addClass('disabled');
-                displayname = 'Chọn tỉnh thành';
-            }
+    $(document).on('change', 'input[name="cs-search__city-checkbox"]', function () {
+        let $this = $(this);
+        let provinceCode = $this.val();
+        let displayName = $this.data("display-name");
 
-            //Reset chọn quận huyện
-            $('input[name="cs-search__district-checkbox"][value=""]').prop('checked', true);
-            $('.cs-search-box__button.district-selection lablel').html('Chọn quận huyện');
-
-            //Reset chọn phường xã
-            $('input[name="cs-search__ward-checkbox"][value=""]').prop('checked', true);
-            $('.cs-search-box__button.ward-selection lablel').html('Chọn phường xã');
+        if (provinceCode) {
+            $('.cs-search-box__button.ward-selection').removeClass('disabled');
+            fetchWards(provinceCode);
+            $('.cs-search-box__button.city-selection label').html(displayName);
+        } else {
             $('.cs-search-box__button.ward-selection').addClass('disabled');
-
-            //Ignore input tìm kiếm tỉnh thành
-            $('.cs-search-box__dropdown-panel--city .input-filter input').val(null);
-            $(".cs-search-box__dropdown-panel--city .cs-search-box__dropdown-item").show();
-
-            //Go back
-            $('.cs-search-box__button.city-selection lablel').html(displayname);
-            $('.cs-search-box__dropdown-panel .title svg').click();
+            $('.cs-search-box__button.ward-selection label').html('Chọn phường / xã');
         }
+        $('.cs-search-box__dropdown-panel .title svg').click();
     });
 
     //Nhập tìm kiếm tỉnh thành
     $('.cs-search-box__dropdown-panel--city .input-filter input').on('input', CommonModule.debounce(function () {
-        fiterLocation($(this).val(), 'cs-search-box__dropdown-panel--city');
-    }, 500));
-
-    //Nhập tìm kiếm quận huyện
-    $('.cs-search-box__dropdown-panel--district .input-filter input').on('input', CommonModule.debounce(function () {
-        fiterLocation($(this).val(), 'cs-search-box__dropdown-panel--district');
-    }, 500));
+        filterLocation($(this).val(), 'cs-search-box__dropdown-panel--city');
+    }, 300));
 
     //Nhập tìm kiếm phường xã
     $('.cs-search-box__dropdown-panel--ward .input-filter input').on('input', CommonModule.debounce(function () {
-        fiterLocation($(this).val(), 'cs-search-box__dropdown-panel--ward');
-    }, 500));
+        filterLocation($(this).val(), 'cs-search-box__dropdown-panel--ward');
+    }, 300));
 
     //Áp dụng khu vực đã lựa chọn
     $('.cs-search-box__btn-apply-location').click(function () {
-        const $wardSelected = $('input[name="cs-search__ward-checkbox"]:checked');
-        const $districtSelected = $('input[name="cs-search__district-checkbox"]:checked');
-        const $citySelected = $('input[name="cs-search__city-checkbox"]:checked');
-        let displayname = '';
+        const $ward = $('input[name="cs-search__ward-checkbox"]:checked');
+        const $city = $('input[name="cs-search__city-checkbox"]:checked');
+
+        let displayName = 'Khu vực';
         let locationSearchId = '';
-        let locationSearchUrl = '';
+        let locationSearchUrl = 'toan-quoc';
 
-        if ($citySelected.val() && $districtSelected.val() && $wardSelected.val()) {
-            displayname = $wardSelected.data("display-name");
-            locationSearchId = 'w' + $wardSelected.val();
-            locationSearchUrl = $wardSelected.attr('data-friendly-url');
-            updateSearchBoxStorage('', $citySelected.val(), $districtSelected.val(), $wardSelected.val(), '');
-        }
-        else if ($citySelected.val() && $districtSelected.val()) {
-            displayname = $districtSelected.data("display-name");
-            locationSearchId = 'd' + $districtSelected.val();
-            locationSearchUrl = $districtSelected.attr('data-friendly-url');
-            updateSearchBoxStorage('', $citySelected.val(), $districtSelected.val(), null, '');
-        }
-        else if ($citySelected.val()) {
-            displayname = $citySelected.data("display-name");
-            locationSearchId = 'c' + $citySelected.val();
-            locationSearchUrl = $citySelected.attr('data-friendly-url');
-            updateSearchBoxStorage('', $citySelected.val(), null, null, '');
-        }
-        else {
-            displayname = 'Khu vực';
-            locationSearchUrl = 'toan-quoc';
-            updateSearchBoxStorage('', null, null, null, '');
+        if ($city.val() && $ward.val()) {
+            displayName = $ward.data("display-name");
+            locationSearchId = 'w' + $ward.val();
+            locationSearchUrl = $ward.attr('data-friendly-url');
+            updateSearchBoxStorage('', $city.val(), null, $ward.val(), '');
+        } else if ($city.val()) {
+            displayName = $city.data("display-name");
+            locationSearchId = 'c' + $city.val();
+            locationSearchUrl = $city.attr('data-friendly-url');
+            updateSearchBoxStorage('', $city.val(), null, null, '');
         }
 
-        $('.cs-search-box__selection--location .dropdown span').html(displayname);
+        $('.cs-search-box__selection--location .dropdown span').html(displayName);
         $('.cs-search-box__selection--location .cs-search-box__dropdown-panel').hide();
-        $('.cs-search-box__selection--location #search-box__location-search-id').val(locationSearchId);
-        $('.cs-search-box__selection--location #search-box__location-search-id').attr('data-friendly-url', locationSearchUrl);
+        $('#search-box__location-search-id').val(locationSearchId).attr('data-friendly-url', locationSearchUrl);
     });
 
     $('.cs-search-box__btn-clean-location').click(function () {
-        $(`input[name="cs-search__city-checkbox"][value=""]`).parent().checkbox('check');
-        $('.cs-search-box__btn-apply-location').click();
-    })
+        $('input[name="cs-search__city-checkbox"][value=""]').prop('checked', true).trigger('change');
+    });
+
+    // Load ban đầu nếu có dữ liệu lưu
+    let searchBoxStorage = getSearchBoxStorage();
+    if (searchBoxStorage && searchBoxStorage.cityId) {
+        $(`input[name="cs-search__city-checkbox"][value="${searchBoxStorage.cityId}"]`).prop('checked', true).trigger('change');
+    }
+    
     //Sự kiện đóng panel gợi ý
     $(document).on("click", function (event) {
         let targetDiv = $(".cs-search__imput");
@@ -310,129 +275,92 @@ function fetchCategories(transactionType) {
     });
 }
 
-function fetchDistricts(provinceId) {
-    $('.cs-search-box__button.district-selection .dropdown').addClass('loading');
+function loadProvinces() {
     $.ajax({
-        url: `${apiGetwayUrl}/location/districts?cityId=${provinceId}`,
+        url: tvndAjax.ajaxurl,
         type: 'GET',
-        success: function (data) {
-            let items = `<div class="cs-search-box__dropdown-item">
-                            <div class="ui radio checkbox">
-                                <input type="radio" value="" data-display-name="Chọn quận huyện" name="cs-search__district-checkbox">
-                                <label>Tất cả quận huyện</label>
-                            </div>
-                        </div>`;
-
-            if (data && data.data) {
-                items += data.data.sort((a, b) => a.districtId.localeCompare(b.districtId)).map(c => `<div class="cs-search-box__dropdown-item">
-                                        <div class="ui radio checkbox">
-                                            <input type="radio" value="${c.districtId}" data-display-name="${c.districtName}" data-friendly-url="${c.friendlyUrl}" name="cs-search__district-checkbox">
-                                            <label>${c.districtName}</label>
-                                        </div>
-                                    </div>`).join('');
-            }
-            $('.cs-search-box__dropdown-panel--district .cs-search-box__dropdown-menu').html(items);
-            $('.cs-search-box__dropdown-panel--district .checkbox.radio').checkbox({
-                onChecked: function () {
-                    let displayname = '';
-                    if ($(this).val()) {
-                        displayname = $(this).data("display-name");
-                        $('.cs-search-box__button.ward-selection').removeClass('disabled');
-                        fetchWards($(this).val());
-                    }
-                    else {
-                        displayname = 'Chọn quận huyện';
-                        $('.cs-search-box__button.ward-selection').addClass('disabled')
-                    }
-
-                    //Reset chọn phường xã
-                    $('input[name="cs-search__ward-checkbox"][value=""]').prop('checked', true);
-                    $('.cs-search-box__button.ward-selection lablel').html('Chọn phường xã');
-
-                    //Ignore input tìm kiếm quận huyện
-                    $('.cs-search-box__dropdown-panel--district .input-filter input').val(null);
-                    $(".cs-search-box__dropdown-panel--district .cs-search-box__dropdown-item").show();
-
-                    //Goback
-                    $('.cs-search-box__button.district-selection lablel').html(displayname);
-                    $('.cs-search-box__dropdown-panel .title svg').click();
-                }
-            });
-            if (initialSearchBoxLocation) {
-                let searchBoxStorage = getSearchBoxStorage();
-                if (searchBoxStorage) {
-                    $(`input[name="cs-search__district-checkbox"][value="${searchBoxStorage.districtId}"]`).parent().checkbox('check');
-                    if (!searchBoxStorage.wardId) {
-                        $('.cs-search-box__btn-apply-location').click();
-                        initialSearchBoxLocation = false;
-                    }
-                }
-            }
+        data: {
+            action: 'get_provinces'
         },
-        error: function () {
-        },
-        complete: function () {
-            $('.cs-search-box__button.district-selection .dropdown').removeClass('loading');
+        success: function(res) {
+            if (res.success) {
+                let html = `<div class="cs-search-box__dropdown-item">
+                    <div class="ui radio checkbox">
+                        <input type="radio" value="" data-display-name="Toàn quốc" data-friendly-url="toan-quoc" name="cs-search__city-checkbox">
+                        <label>Toàn quốc</label>
+                    </div>
+                </div>`;
+
+                res.data.forEach(p => {
+                    html += `<div class="cs-search-box__dropdown-item">
+                        <div class="ui radio checkbox">
+                            <input type="radio" value="${p.province_code}" 
+                                   data-display-name="${p.name}" 
+                                   data-friendly-url="${p.friendly_url || p.short_name}" 
+                                   name="cs-search__city-checkbox">
+                            <label>${p.name}</label>
+                        </div>
+                    </div>`;
+                });
+
+                $('#province-list').html(html);
+                $('.cs-search-box__dropdown-panel--city .checkbox.radio').checkbox();
+            }
         }
     });
 }
 
-function fetchWards(districtId) {
-    $('.cs-search-box__button.ward-selection .dropdown').addClass('loading');
+function fetchWards(provinceCode) {
+    $('.cs-search-box__button.ward-selection').addClass('loading');
     $.ajax({
-        url: `${apiGetwayUrl}/location/wards?districtId=${districtId}`,
+        url: tvndAjax.ajaxurl,
         type: 'GET',
-        success: function (data) {
-            let items = `<div class="cs-search-box__dropdown-item">
-                            <div class="ui radio checkbox">
-                                <input type="radio" value="" data-display-name="Chọn phường xã" name="cs-search__ward-checkbox">
-                                <label>Tất cả phường xã</label>
-                            </div>
-                        </div>`;
-
-            if (data && data.data) {
-                items += data.data.sort((a, b) => a.wardId.localeCompare(b.wardId)).map(c => `<div class="cs-search-box__dropdown-item">
-                                        <div class="ui radio checkbox">
-                                            <input type="radio" value="${c.wardId}" data-display-name="${c.wardName}" data-friendly-url="${c.friendlyUrl}" name="cs-search__ward-checkbox">
-                                            <label>${c.wardName}</label>
-                                        </div>
-                                    </div>`).join('');
-            }
-            $('.cs-search-box__dropdown-panel--ward .cs-search-box__dropdown-menu').html(items);
-            $('.cs-search-box__dropdown-panel--ward .checkbox.radio').checkbox({
-                onChecked: function () {
-                    let displayname = '';
-                    if ($(this).val()) {
-                        displayname = $(this).data("display-name");
-                    }
-                    else {
-                        displayname = 'Chọn phường xã';
-                    }
-
-                    //Ignore input tìm kiếm phường xã
-                    $('.cs-search-box__dropdown-panel--ward .input-filter input').val(null);
-                    $(".cs-search-box__dropdown-panel--ward .cs-search-box__dropdown-item").show();
-
-                    //Goback
-                    $('.cs-search-box__button.ward-selection lablel').html(displayname);
-                    $('.cs-search-box__dropdown-panel .title svg').click();
-                }
-            });
-
-            if (initialSearchBoxLocation) {
-                let searchBoxStorage = getSearchBoxStorage();
-                if (searchBoxStorage) {
-                    $(`input[name="cs-search__ward-checkbox"][value="${searchBoxStorage.wardId}"]`).parent().checkbox('check');
-                    $('.cs-search-box__btn-apply-location').click();
-                    initialSearchBoxLocation = false;
-                }
-            }
+        data: {
+            action: 'get_wards_by_province',
+            province_code: provinceCode
         },
-        error: function () {
+        success: function(res) {
+            let html = `<div class="cs-search-box__dropdown-item">
+                <div class="ui radio checkbox">
+                    <input type="radio" value="" data-display-name="Tất cả phường xã" name="cs-search__ward-checkbox">
+                    <label>Tất cả phường / xã</label>
+                </div>
+            </div>`;
+
+            if (res.success && res.data.length) {
+                res.data.forEach(w => {
+                    html += `<div class="cs-search-box__dropdown-item">
+                        <div class="ui radio checkbox">
+                            <input type="radio" value="${w.ward_code}" 
+                                   data-display-name="${w.name}" 
+                                   data-friendly-url="${w.friendly_url || w.ward_code}" 
+                                   name="cs-search__ward-checkbox">
+                            <label>${w.name}</label>
+                        </div>
+                    </div>`;
+                });
+            }
+            $('#ward-list').html(html);
+            $('.cs-search-box__dropdown-panel--ward .checkbox.radio').checkbox();
         },
-        complete: function () {
-            $('.cs-search-box__button.ward-selection .dropdown').removeClass('loading');
+        complete: function() {
+            $('.cs-search-box__button.ward-selection').removeClass('loading');
         }
+    });
+}
+
+function filterLocation(input, className) {
+    const keyword = (input || "").toLowerCase().trim();
+    const $items = $(`.${className} .cs-search-box__dropdown-item`);
+
+    if (!keyword) {
+        $items.show();
+        return;
+    }
+
+    $items.each(function() {
+        const name = $(this).find('label').text().toLowerCase();
+        $(this).toggle(name.includes(keyword));
     });
 }
 

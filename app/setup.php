@@ -585,3 +585,54 @@ add_action('rwmb_after_save_post', function ($post_id) {
     // Debug log (xem kết quả)
     error_log("=== [FORCE SAVE] ward_code = '" . $ward_code . "' | post_id = {$post_id} ===");
 }, 20);
+
+// ====================== AJAX LẤY TỈNH THÀNH & PHƯỜNG XÃ ======================
+add_action('wp_ajax_get_provinces', '\App\tvnd_get_provinces');
+add_action('wp_ajax_nopriv_get_provinces', '\App\tvnd_get_provinces');
+
+// ====================== AJAX LẤY TỈNH THÀNH & PHƯỜNG XÃ ======================
+add_action('wp_ajax_get_provinces', '\App\tvnd_get_provinces');
+add_action('wp_ajax_nopriv_get_provinces', '\App\tvnd_get_provinces');
+
+function tvnd_get_provinces() {
+    global $wpdb;
+    $provinces = $wpdb->get_results("
+        SELECT id, name, short_name, province_code, place_type 
+        FROM wp_provinces 
+        WHERE is_active = 1 
+        ORDER BY name ASC
+    ");
+    wp_send_json_success($provinces);
+}
+
+add_action('wp_ajax_get_wards_by_province', '\App\tvnd_get_wards_by_province');
+add_action('wp_ajax_nopriv_get_wards_by_province', '\App\tvnd_get_wards_by_province');
+
+function tvnd_get_wards_by_province() {
+    global $wpdb;
+    $province_code = sanitize_text_field($_GET['province_code'] ?? '');
+
+    $wards = $wpdb->get_results($wpdb->prepare("
+        SELECT id, name, ward_code, place_type 
+        FROM wp_wards 
+        WHERE province_code = %s AND is_active = 1 
+        ORDER BY name ASC
+    ", $province_code));
+
+    wp_send_json_success($wards);
+}
+
+// ====================== FIX tvndAjax is not defined - SAGE + VITE ======================
+add_action('wp_head', function () {
+    if (is_admin() || wp_doing_ajax()) {
+        return;
+    }
+    ?>
+    <script>
+        window.tvndAjax = {
+            ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>',
+            nonce:   '<?php echo wp_create_nonce('tvnd_location_nonce'); ?>'
+        };
+    </script>
+    <?php
+}, 1); // priority 1 = chạy rất sớm
