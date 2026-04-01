@@ -51,10 +51,6 @@
 
                     <a href="https://thuviennhadat.vn/lien-he.html" class="mini ui blue basic button gop-y-hover" style="margin-right: 10px; font-size: 14px !important; color: blue !important; box-shadow: 0px 0px 0px 1px blue inset !important;"><i class="envelope outline icon"></i> Mời góp ý</a>
                 </div>
-
-                <link href="/Content/Common/search-component.css?v=1.0.90" rel="stylesheet">
-<link href="/Content/Common/search-box.css?v=1.0.90" rel="stylesheet">
-
 <!-- Search Container -->
 
 <div class="search-container" id="search-container">

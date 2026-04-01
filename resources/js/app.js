@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
   $('.ui.popup').popup();
 });
 
+import CommonModule from './components/CommonModule.js';
+window.CommonModule = CommonModule; 
+
 // === COMPONENTS AUTO-INIT ===
 import './components/init.js';
 import './components/main.js';
+import './components/search-component.js';
+import './components/search-box.js';
