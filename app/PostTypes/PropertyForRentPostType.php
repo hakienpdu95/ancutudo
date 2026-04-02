@@ -24,4 +24,9 @@ class PropertyForRentPostType extends BasePostType {
             // 'map_meta_cap'    => true,
         ]);
     }
+
+    protected function useDefaultCategory(): bool
+    {
+        return true; 
+    }
 }

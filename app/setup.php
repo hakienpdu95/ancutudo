@@ -587,14 +587,14 @@ add_action('rwmb_after_save_post', function ($post_id) {
 }, 20);
 
 // ====================== AJAX LẤY TỈNH THÀNH & PHƯỜNG XÃ ======================
-add_action('wp_ajax_get_provinces', '\App\tvnd_get_provinces');
-add_action('wp_ajax_nopriv_get_provinces', '\App\tvnd_get_provinces');
+add_action('wp_ajax_get_provinces', '\App\actd_get_provinces');
+add_action('wp_ajax_nopriv_get_provinces', '\App\actd_get_provinces');
 
 // ====================== AJAX LẤY TỈNH THÀNH & PHƯỜNG XÃ ======================
-add_action('wp_ajax_get_provinces', '\App\tvnd_get_provinces');
-add_action('wp_ajax_nopriv_get_provinces', '\App\tvnd_get_provinces');
+add_action('wp_ajax_get_provinces', '\App\actd_get_provinces');
+add_action('wp_ajax_nopriv_get_provinces', '\App\actd_get_provinces');
 
-function tvnd_get_provinces() {
+function actd_get_provinces() {
     global $wpdb;
     $provinces = $wpdb->get_results("
         SELECT id, name, short_name, province_code, place_type 
@@ -605,10 +605,10 @@ function tvnd_get_provinces() {
     wp_send_json_success($provinces);
 }
 
-add_action('wp_ajax_get_wards_by_province', '\App\tvnd_get_wards_by_province');
-add_action('wp_ajax_nopriv_get_wards_by_province', '\App\tvnd_get_wards_by_province');
+add_action('wp_ajax_get_wards_by_province', '\App\actd_get_wards_by_province');
+add_action('wp_ajax_nopriv_get_wards_by_province', '\App\actd_get_wards_by_province');
 
-function tvnd_get_wards_by_province() {
+function actd_get_wards_by_province() {
     global $wpdb;
     $province_code = sanitize_text_field($_GET['province_code'] ?? '');
 
@@ -622,17 +622,57 @@ function tvnd_get_wards_by_province() {
     wp_send_json_success($wards);
 }
 
-// ====================== FIX tvndAjax is not defined - SAGE + VITE ======================
+// ====================== AJAX LẤY CATEGORY TỪ WORDPRESS ======================
+add_action('wp_ajax_get_categories_by_tab', '\App\actd_get_categories_by_tab');
+add_action('wp_ajax_nopriv_get_categories_by_tab', '\App\actd_get_categories_by_tab');
+
+function actd_get_categories_by_tab() {
+    $transaction = intval($_GET['transaction'] ?? 1);
+
+    // === ĐIỀN DANH SÁCH TAG_ID CỦA BẠN VÀO ĐÂY ===
+    $sale_ids = [4];     // ← Thay bằng tag_ID thật của tab MUA BÁN
+    $rent_ids = [5];     // ← Thay bằng tag_ID thật của tab CHO THUÊ
+
+    $include = ($transaction === 2) ? $rent_ids : $sale_ids;
+
+    if (empty($include)) {
+        wp_send_json_success([]);
+    }
+
+    $categories = get_terms([
+        'taxonomy'   => 'category',
+        'hide_empty' => false,
+        'include'    => $include,
+        'orderby'    => 'include',   // giữ đúng thứ tự bạn liệt kê
+    ]);
+
+    if (is_wp_error($categories)) {
+        wp_send_json_success([]);
+    }
+
+    $result = array_map(function ($cat) {
+        return [
+            'Id'           => $cat->term_id,
+            'CategoryName' => $cat->name,
+            'FriendlyUrl'  => $cat->slug,
+            'ImageIcon'    => ''   // nếu sau này có icon thì bổ sung
+        ];
+    }, $categories);
+
+    wp_send_json_success($result);
+}
+
 add_action('wp_head', function () {
     if (is_admin() || wp_doing_ajax()) {
         return;
     }
     ?>
     <script>
-        window.tvndAjax = {
+        window.actdAjax = {
             ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>',
-            nonce:   '<?php echo wp_create_nonce('tvnd_location_nonce'); ?>'
+            homeurl: '<?php echo home_url('/'); ?>',
+            nonce:   '<?php echo wp_create_nonce('actd_location_nonce'); ?>'
         };
     </script>
     <?php
-}, 1); // priority 1 = chạy rất sớm
+}, 1);

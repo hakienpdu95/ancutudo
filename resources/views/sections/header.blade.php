@@ -106,8 +106,8 @@
 	                                <span class="br-" style="margin-left: 8px; font-size: 10px; font-weight:400; opacity: 0.6;">Trang thông tin điện tử tổng hợp</span>
 	                            </strong>
 	                        </div>
-	                        <div href="/" class="logo slg-tvnd" style="position:absolute; bottom: 8px">
-	                            <span class="slogan-tvnd">...hiểu pháp lý, rõ quy hoạch, giao dịch nhanh...</span>
+	                        <div href="/" class="logo slg-actd" style="position:absolute; bottom: 8px">
+	                            <span class="slogan-actd">...hiểu pháp lý, rõ quy hoạch, giao dịch nhanh...</span>
 	                        </div>
 	                    </div>
 	                    <div class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
@@ -358,43 +358,6 @@
 	                </div>
 	                <div style="display:flex; padding: 0;">
 	                    <div id="content-login" class="item" style="display: flex; padding: 0; width: 100%; align-items: center; justify-content: flex-end; gap: .5rem;">
-	                        <div id="notify-favorite"></div>
-	                        <div id="notify-toast"></div>
-	                        <div class="ui simple dropdown item user-sign-in" style="display: none; max-width: 100% !important; padding-right: 5px; padding-left: 5px; position: relative;" tabindex="0">
-	                            <div class="text">
-	                                <img class="ui avatar image user-avatar" style="margin-right: 0;" loading="lazy">
-	                                <a id="user-login" class="dropdown-title user-login" style="color:black"></a>
-	                            </div>
-	                            <i class="dropdown icon" style="margin-left: 5px;"></i>
-	                            <div class="menu menu-info-user" style="" tabindex="-1">
-	                                <a href="/goi-hoi-vien/dang-ky" style="display: flex; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-	                                    <img src="https://cdn.thuviennhadat.vn/upload/bds/HomePage/BannerHVP1.png" style="width: calc(100% + 2px); height: auto; margin: 0 -1px; border-top-left-radius: 1rem; border-top-right-radius: 1rem; ">
-	                                </a>
-	                                <a class="item" href="/tai-khoan/tong-quan">
-	                                    <img class="img-icon-account" src="/Assets/img/pie-chart.svg" alt="Tổng quan"> Tổng quan </a>
-	                                <a class="item" href="/tai-khoan/quan-ly-tin-dang">
-	                                    <img class="img-icon-account" src="/Assets/img/litsting.svg" alt="Quản lý tin đăng"> Quản lý tin đăng </a>
-	                                <a class="item" href="/goi-hoi-vien/dang-ky" style="display:flex;">
-	                                    <i class="users icon"></i>
-	                                    <span>Gói hội viên</span>
-	                                    <span class="ui red label small pull-right" style="margin: 0 0 0 4px;font-weight:500;font-size:12px">Tiết kiệm đến 40%</span>
-	                                </a>
-	                                <a class="item" href="/tai-khoan/quan-ly-khach-hang">
-	                                    <img class="img-icon-account" src="/Assets/img/notebook.svg" alt="Quản lý khách hàng"> Quản lý khách hàng </a>
-	                                <a class="item" href="/tai-khoan/quan-ly-khuyen-mai">
-	                                    <img class="img-icon-account" src="/Assets/img/ticket-voucher.svg" alt="Quản lý khuyến mãi"> Quản lý khuyến mãi </a>
-	                                <a class="item" href="/tai-khoan/danh-sach-tin-da-luu">
-	                                    <img class="img-icon-account" src="/Assets/img/heart.svg" alt="Tin đăng đã lưu"> Tin đăng đã lưu </a>
-	                                <a class="item" id="regist-now-header">
-	                                    <img class="img-icon-account" style="margin-bottom: 0;" src="/Assets/img/office.svg" alt="Môi giới chuyên nghiệp"> Môi giới chuyên nghiệp </a>
-	                                <a class="item" href="/tai-khoan/thong-tin-ca-nhan?type=1">
-	                                    <img class="img-icon-account" src="https://cdn.thuviennhadat.vn//upload/bds/HomePage/gear_11386565.png" alt="Thay đổi thông tin cá nhân"> Thay đổi thông tin cá nhân </a>
-	                                <a class="item" href="/giao-dich/nap-tien">
-	                                    <i class="credit card icon img-icon-account"></i> Nạp tiền </a>
-	                                <a class="item" id="user-sign-out" style="color:black;font-size:14px!important">
-	                                    <img class="img-icon-account" src="https://cdn.thuviennhadat.vn/upload/bds/HomePage/logout.png" alt="icon-logout"> Đăng xuất </a>
-	                            </div>
-	                        </div>
 	                        <div class="ui buttons login" style="justify-content: center; align-items: center;">
 	                            <button class="ui left button login login-header text-primary" id="login-button">Đăng nhập</button>
 	                            <div class="divider-header login-divider-header" style="display: block;"></div>

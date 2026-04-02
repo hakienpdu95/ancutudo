@@ -24,4 +24,9 @@ class PropertyForSalePostType extends BasePostType {
             'supports'        => ['title', 'editor'],
         ]);
     }
+
+    protected function useDefaultCategory(): bool
+    {
+        return true; 
+    }
 }

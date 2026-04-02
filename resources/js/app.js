@@ -25,5 +25,5 @@ window.CommonModule = CommonModule;
 // === COMPONENTS AUTO-INIT ===
 import './components/init.js';
 import './components/main.js';
-import './components/search-component.js';
 import './components/search-box.js';
+import './components/search-component.js';

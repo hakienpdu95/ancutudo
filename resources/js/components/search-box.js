@@ -21,13 +21,9 @@ var initialSearchBoxLocation = true;
 
 function initial() {
 
-    fetchCategories();
-
     loadProvinces();
 
-    $('.cs-search__imput').on('input', CommonModule.debounce(function () {
-        getSuggestion($(this).val());
-    }, 500));
+    fetchCategories();
 
     $('.cs-search__imput').focus(function () {
         $('.cs-search-box__suggestion--history').show();
@@ -56,32 +52,60 @@ function initial() {
         submitSearch($(this).find('.cs-search__imput').val());
     })
 
+    $('.cs-search__tab-item').click(function () {
+        const newType = $(this).data('type');
+
+        if ($('#cs-search__tab-actived').attr('data-type') === newType) return;
+
+        $('.cs-search__tab-item').removeClass('active');
+        $(this).addClass('active');
+
+        let transaction = 1;
+        if (newType === 'project') {
+            transaction = 3;
+            $('.cs-search-box__selection--category').hide();
+        } else if (newType === 'rent') {
+            transaction = 2;
+            $('.cs-search-box__selection--category').show();
+        } else {
+            transaction = 1;
+            $('.cs-search-box__selection--category').show();
+        }
+
+        $('#cs-search__tab-actived').val(transaction).attr('data-type', newType);
+
+        // Reload category theo tab
+        fetchCategories(transaction);
+
+        // Reset tìm kiếm
+        $('.cs-search__imput').val(null);
+        $('.cs-search-box__btn-clear').hide();
+        resetPlaceholderRunning();
+        displayHistory();
+    });
+
     $('.cs-search-box__selection--location .dropdown.item').click(function () {
         $('.cs-search-box__selection--location .cs-search-box__dropdown-panel').toggle();
         $('.cs-search-box__dropdown-panel--main').show();
         $('.cs-search-box__dropdown-panel--city').hide();
-        $('.cs-search-box__dropdown-panel--district').hide();
         $('.cs-search-box__dropdown-panel--ward').hide();
-    })
+    });
 
     $('.cs-search-box__selection--category .dropdown.item').click(function () {
         $('.cs-search-box__selection--category .cs-search-box__dropdown-panel').toggle();
-    })
+    });
 
-    //Sự kiện mở danh sách tỉnh thành 
     $('.cs-search-box__button.city-selection').click(function () {
         $('.cs-search-box__dropdown-panel--main').hide();
         $('.cs-search-box__dropdown-panel--city').show();
     });
 
-    //Sự kiện mở danh sách phường xã 
     $('.cs-search-box__button.ward-selection').click(function () {
         if ($(this).hasClass('disabled')) return;
         $('.cs-search-box__dropdown-panel--main').hide();
         $('.cs-search-box__dropdown-panel--ward').show();
     });
 
-    //Sự kiện quay lại trong chọn khu vực
     $('.cs-search-box__dropdown-panel .title svg').click(function () {
         $('.cs-search-box__dropdown-panel--main').show();
         $('.cs-search-box__dropdown-panel--city').hide();
@@ -92,7 +116,9 @@ function initial() {
     $(document).on('change', 'input[name="cs-search__city-checkbox"]', function () {
         let $this = $(this);
         let provinceCode = $this.val();
-        let displayName = $this.data("display-name");
+        let displayName = $this.data("display-name") || 'Chọn tỉnh thành';
+
+        resetWardSelection();
 
         if (provinceCode) {
             $('.cs-search-box__button.ward-selection').removeClass('disabled');
@@ -100,22 +126,19 @@ function initial() {
             $('.cs-search-box__button.city-selection label').html(displayName);
         } else {
             $('.cs-search-box__button.ward-selection').addClass('disabled');
-            $('.cs-search-box__button.ward-selection label').html('Chọn phường / xã');
+            $('.cs-search-box__button.city-selection label').html('Chọn tỉnh thành');
         }
         $('.cs-search-box__dropdown-panel .title svg').click();
     });
 
-    //Nhập tìm kiếm tỉnh thành
     $('.cs-search-box__dropdown-panel--city .input-filter input').on('input', CommonModule.debounce(function () {
         filterLocation($(this).val(), 'cs-search-box__dropdown-panel--city');
     }, 300));
 
-    //Nhập tìm kiếm phường xã
     $('.cs-search-box__dropdown-panel--ward .input-filter input').on('input', CommonModule.debounce(function () {
         filterLocation($(this).val(), 'cs-search-box__dropdown-panel--ward');
     }, 300));
 
-    //Áp dụng khu vực đã lựa chọn
     $('.cs-search-box__btn-apply-location').click(function () {
         const $ward = $('input[name="cs-search__ward-checkbox"]:checked');
         const $city = $('input[name="cs-search__city-checkbox"]:checked');
@@ -151,13 +174,11 @@ function initial() {
         $(`input[name="cs-search__city-checkbox"][value="${searchBoxStorage.cityId}"]`).prop('checked', true).trigger('change');
     }
     
-    //Sự kiện đóng panel gợi ý
     $(document).on("click", function (event) {
         let targetDiv = $(".cs-search__imput");
         if (!targetDiv.is(event.target) && targetDiv.has(event.target).length === 0) {
             $('.cs-search-box__suggestion').hide();
             $(".cs-search-box__backdrop").hide();
-
             if (!isPlaceholderRunning) {
                 isPlaceholderRunning = true;
                 displayPlaceholderRunning();
@@ -190,84 +211,48 @@ function initial() {
     displayPlaceholder = arrPlaceholder[Math.floor(Math.random() * arrPlaceholder.length)];
     displayPlaceholderRunning();
     displayHistory();
-
-    if (initialSearchBoxLocation) {
-        let searchBoxStorage = getSearchBoxStorage();
-        if (searchBoxStorage && searchBoxStorage.cityId) {
-            $(`input[name="cs-search__city-checkbox"][value="${searchBoxStorage.cityId}"]`).parent().checkbox('check');
-            if (!searchBoxStorage.districtId && !searchBoxStorage.wardId) {
-                $('.cs-search-box__btn-apply-location').click();
-                initialSearchBoxLocation = false;
-            }
-        }
-        else {
-            initialSearchBoxLocation = false;
-        }
-    }
 }
 
-function fetchCategories(transactionType) {
-    let url = '/Category/GetAllSaleCategory';
-    if (transactionType == 2) {
-        url = '/Category/GetAllRentCategory'
-    }
-    else {
-        transactionType = 1;
-    }
+function fetchCategories(transactionType = 1) {
     $('.cs-search-box__selection--category .dropdown').addClass('loading');
-    $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (data) {
-            let items = `<div class="d-flex cs-search-box__dropdown-item">
-                        <div class="ui radio checkbox">
-                            <input type="radio" value="" data-display-name="Tất cả loại hình" name="cs-search__category-checkbox" data-friendly-url="nha-dat" checked="checked">
-                            <label>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
-                                    <path fill="currentColor" d="M10 3H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1m10 0h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1M10 13H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1m7 0a4 4 0 1 1-3.995 4.2L13 17l.005-.2A4 4 0 0 1 17 13" />
-                                </svg>
-                        Tất cả loại hình</label>
-                            </div>
-                        </div>`;
-            items += data.map(c => `<div class="d-flex cs-search-box__dropdown-item">
-                            <div class="ui radio checkbox">
-                                <input type="radio" value="${c.Id}" data-display-name="${c.CategoryName}" data-friendly-url="${c.FriendlyUrl}" name="cs-search__category-checkbox">
-                                <label>
-                                    ${c.ImageIcon}
-                                    ${c.CategoryName}
-                                </label>
-                            </div>
-                        </div>`).join('');
-            $('.cs-search-box__selection--category .cs-search-box__dropdown-menu').html(items);
-            $('.cs-search-box__selection--category .checkbox.radio').checkbox({
-                onChecked: function () {
-                    const $transaction = $('#cs-search__tab-actived');
-                    let displayname = '';
-                    if ($(this).val()) {
-                        displayname = $(this).data("display-name")
-                        updateSearchBoxStorage($transaction.val(), '', '', '', $(this).val());
-                    }
-                    else {
-                        displayname = 'Loại hình';
-                        updateSearchBoxStorage($transaction.val(), '', '', '', null);
-                    }
-                    $('.cs-search-box__selection--category .dropdown span').html(displayname);
-                    $('.cs-search-box__selection--category .dropdown svg').html($(this).parent().children('label').children('svg').html())
-                    $('.cs-search-box__selection--category .cs-search-box__dropdown-panel').hide();
-                }
-            });
 
-            let searchBoxStorage = getSearchBoxStorage();
-            if (searchBoxStorage && searchBoxStorage.transaction == transactionType) {
-                $(`input[name="cs-search__category-checkbox"][value="${searchBoxStorage.categoryId}"]`).parent().checkbox('check');
-            }
-            else {
-                $('.cs-search-box__selection--category .dropdown span').html('Loại hình');
-                $('.cs-search-box__selection--category .dropdown svg').html(
-                    ` <path fill="currentColor" d="M10 3H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1m10 0h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1M10 13H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1m7 0a4 4 0 1 1-3.995 4.2L13 17l.005-.2A4 4 0 0 1 17 13" />`);
-            }
+    $.ajax({
+        url: actdAjax.ajaxurl,
+        type: 'GET',
+        data: {
+            action: 'get_categories_by_tab',
+            transaction: transactionType
         },
-        error: function () {
+        success: function (res) {
+            if (res.success) {
+                let items = `<div class="d-flex cs-search-box__dropdown-item">
+                    <div class="ui radio checkbox">
+                        <input type="radio" value="" data-display-name="Tất cả loại hình" name="cs-search__category-checkbox" data-friendly-url="nha-dat" checked>
+                        <label><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M10 3H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1m10 0h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1M10 13H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1m7 0a4 4 0 1 1-3.995 4.2L13 17l.005-.2A4 4 0 0 1 17 13" /></svg> Tất cả loại hình</label>
+                    </div>
+                </div>`;
+
+                res.data.forEach(c => {
+                    items += `<div class="d-flex cs-search-box__dropdown-item">
+                        <div class="ui radio checkbox">
+                            <input type="radio" value="${c.Id}" data-display-name="${c.CategoryName}" data-friendly-url="${c.FriendlyUrl}" name="cs-search__category-checkbox">
+                            <label>${c.ImageIcon || ''} ${c.CategoryName}</label>
+                        </div>
+                    </div>`;
+                });
+
+                $('.cs-search-box__selection--category .cs-search-box__dropdown-menu').html(items);
+
+                $('.cs-search-box__selection--category .checkbox.radio').checkbox({
+                    onChecked: function () {
+                        const $transaction = $('#cs-search__tab-actived');
+                        let displayname = $(this).val() ? $(this).data("display-name") : 'Loại hình';
+                        updateSearchBoxStorage($transaction.val(), '', '', '', $(this).val());
+                        $('.cs-search-box__selection--category .dropdown span').html(displayname);
+                        $('.cs-search-box__selection--category .cs-search-box__dropdown-panel').hide();
+                    }
+                });
+            }
         },
         complete: function () {
             $('.cs-search-box__selection--category .dropdown').removeClass('loading');
@@ -275,14 +260,25 @@ function fetchCategories(transactionType) {
     });
 }
 
+function resetWardSelection() {
+    $('input[name="cs-search__ward-checkbox"]').prop('checked', false);
+    $('.cs-search-box__button.ward-selection label').html('Chọn phường / xã');
+    $('#ward-list').html(`
+        <div class="cs-search-box__dropdown-item">
+            <div class="ui radio checkbox">
+                <input type="radio" value="" data-display-name="Tất cả phường xã" name="cs-search__ward-checkbox">
+                <label>Tất cả phường / xã</label>
+            </div>
+        </div>
+    `);
+}
+
 function loadProvinces() {
     $.ajax({
-        url: tvndAjax.ajaxurl,
+        url: actdAjax.ajaxurl,
         type: 'GET',
-        data: {
-            action: 'get_provinces'
-        },
-        success: function(res) {
+        data: { action: 'get_provinces' },
+        success: function (res) {
             if (res.success) {
                 let html = `<div class="cs-search-box__dropdown-item">
                     <div class="ui radio checkbox">
@@ -312,14 +308,15 @@ function loadProvinces() {
 
 function fetchWards(provinceCode) {
     $('.cs-search-box__button.ward-selection').addClass('loading');
+
     $.ajax({
-        url: tvndAjax.ajaxurl,
+        url: actdAjax.ajaxurl,
         type: 'GET',
-        data: {
+        data: { 
             action: 'get_wards_by_province',
-            province_code: provinceCode
+            province_code: provinceCode 
         },
-        success: function(res) {
+        success: function (res) {
             let html = `<div class="cs-search-box__dropdown-item">
                 <div class="ui radio checkbox">
                     <input type="radio" value="" data-display-name="Tất cả phường xã" name="cs-search__ward-checkbox">
@@ -340,10 +337,20 @@ function fetchWards(provinceCode) {
                     </div>`;
                 });
             }
+
             $('#ward-list').html(html);
             $('.cs-search-box__dropdown-panel--ward .checkbox.radio').checkbox();
+
+            // Bind event khi chọn phường xã
+            $('.cs-search-box__dropdown-panel--ward .ui.radio.checkbox').checkbox({
+                onChecked: function () {
+                    let displayName = $(this).data("display-name") || 'Chọn phường xã';
+                    $('.cs-search-box__button.ward-selection label').html(displayName);
+                    $('.cs-search-box__dropdown-panel .title svg').click();
+                }
+            });
         },
-        complete: function() {
+        complete: function () {
             $('.cs-search-box__button.ward-selection').removeClass('loading');
         }
     });
@@ -358,49 +365,99 @@ function filterLocation(input, className) {
         return;
     }
 
-    $items.each(function() {
+    $items.each(function () {
         const name = $(this).find('label').text().toLowerCase();
         $(this).toggle(name.includes(keyword));
     });
 }
 
+
+// ====================== SUBMIT SEARCH – TẤT CẢ TAB ĐỀU LÀ CATEGORY ======================
 function submitSearch(input) {
-    let keyword = input;
-    if (!keyword) {
-        const $category = $('input[name="cs-search__category-checkbox"]:checked');
-        const $location = $('.cs-search-box__selection--location #search-box__location-search-id');
-        let url = $('.cs-search__tab-item.active').data('type') == 'project' ? 'du-an-bat-dong-san' :
-            $('.cs-search__tab-item.active').data('type') == 'rent' ? `cho-thue-${$category.length > 0 ? $category.attr('data-friendly-url') : 'nha-dat'}-${$location.length > 0 ? $location.attr('data-friendly-url') : 'toan-quoc'}` :
-                `ban-${$category.length > 0 ? $category.attr('data-friendly-url') : 'nha-dat'}-${$location.length > 0 ? $location.attr('data-friendly-url') : 'toan-quoc'}`;
-        redirectToSearchPage(null, url + '?');
-        return;
-    }
-    if (suggetionLoaded && suggetionLoaded.res && suggetionLoaded.keyword == keyword) {
-        redirectToSearchPage(suggetionLoaded.res.DisplayName, suggetionLoaded.res.RedirectUrl);
+    let keyword = (input || "").trim();
+
+    const $category = $('input[name="cs-search__category-checkbox"]:checked');
+    const $location = $('.cs-search-box__selection--location #search-box__location-search-id');
+
+    let type = $('.cs-search__tab-item.active').data('type');
+
+    // Base URL động
+    let base = actdAjax.homeurl.endsWith('/') ? actdAjax.homeurl : actdAjax.homeurl + '/';
+
+    let path;
+
+    if (type === 'project') {
+        // Tab Dự án cũng là category
+        path = `category/du-an-bat-dong-san`;
     } else {
-        getSuggestion(keyword, true);
+        let prefix = (type === 'rent') ? 'cho-thue' : 'ban';
+        let parentSlug = `${prefix}-nha-dat-toan-quoc`;
+
+        // Có chọn loại hình cụ thể hay không
+        let categorySlug = ($category.length > 0 && $category.val() !== "")
+            ? $category.attr('data-friendly-url')
+            : null;
+
+        path = `category/${parentSlug}`;
+        if (categorySlug) {
+            path += `/${categorySlug}`;
+        }
     }
+
+    // Query params
+    let params = new URLSearchParams();
+    if (keyword) params.append('q', keyword);
+
+    const locationId = $location.val() || '';
+    if (locationId.startsWith('c')) {
+        params.append('province_code', locationId.substring(1));
+    } else if (locationId.startsWith('w')) {
+        params.append('ward_code', locationId.substring(1));
+    }
+
+    let queryString = params.toString() ? '?' + params.toString() : '';
+
+    let finalPath = path + queryString;
+
+    redirectToSearchPage(null, finalPath);
 }
 
+// ====================== REDIRECT – ĐỘNG ROOT DOMAIN ======================
 function redirectToSearchPage(displayName, redirectUrl) {
     let type = $('.cs-search__tab-item.active').data('type') == 'project' ? 'project' : 'post';
+
     if (displayName) {
         saveSearchHistory(displayName, redirectUrl, type);
     }
-    let utmTrackings = ['utm_source=thuviennhadat_khungtimkiem', 'utm_medium=internal', 'utm_campaign=danh_sach_tin_dang'];
+
+    let utmTrackings = [
+        'utm_source=ancutudo_khungtimkiem',
+        'utm_medium=internal',
+        'utm_campaign=danh_sach_tin_dang'
+    ];
+
     let currentPage = window.location.pathname;
-    if (currentPage == "/") {
+    if (currentPage === "/") {
         utmTrackings.push('utm_content=box_goi_y_tim_kiem.trang_chu');
-    }
-    else {
+    } else {
         utmTrackings.push('utm_content=box_goi_y_tim_kiem.danh_sach');
     }
+
     let utmParams = utmTrackings.join('&');
-    window.location.href = "/" + redirectUrl + utmParams;
+
+    let finalUrl = actdAjax.homeurl + (redirectUrl.startsWith('/') ? redirectUrl.slice(1) : redirectUrl);
+
+    if (finalUrl.includes('?')) {
+        finalUrl += "&" + utmParams;
+    } else {
+        finalUrl += "?" + utmParams;
+    }
+
+    window.location.href = finalUrl;
 }
 
 function saveSearchHistory(displayName, redirectUrl, type) {
-    let strSearchHistoryLocals = localStorage.getItem('tvnd-search-history');
+    let strSearchHistoryLocals = localStorage.getItem('actd-search-history');
     let searchHistoryLocals = [];
     if (strSearchHistoryLocals) {
         searchHistoryLocals = JSON.parse(strSearchHistoryLocals);
@@ -414,12 +471,12 @@ function saveSearchHistory(displayName, redirectUrl, type) {
         RedirectUrl: redirectUrl,
         Type: type
     });
-    localStorage.setItem('tvnd-search-history', JSON.stringify(searchHistoryLocals));
+    localStorage.setItem('actd-search-history', JSON.stringify(searchHistoryLocals));
 }
 
 function displayHistory() {
     let type = $('.cs-search__tab-item.active').data('type') == 'project' ? 'project' : 'post';
-    let strSearchHistoryLocals = localStorage.getItem('tvnd-search-history');
+    let strSearchHistoryLocals = localStorage.getItem('actd-search-history');
     if (strSearchHistoryLocals) {
         $('.cs-search-box__suggestion--history .cs-search-box__suggestion--content').empty();
         let searchHistoryLocals = JSON.parse(strSearchHistoryLocals).filter(c => c.Type == type);
@@ -479,117 +536,6 @@ function resetPlaceholderRunning() {
         displayPlaceholder = arrPlaceholder[Math.floor(Math.random() * arrPlaceholder.length)];
     }
     displayPlaceholderRunning();
-}
-
-function getSuggestion(input, accessRedirect) {
-    let dataType = $('.cs-search__tab-item.active').data('type');
-    turnOnLoader();
-    if (dataType == 'project') {
-        getProjectSuggestion(input, accessRedirect);
-    }
-    else {
-        getPostSuggestion(input, accessRedirect);
-    }
-}
-
-function getPostSuggestion(input, accessRedirect = null) {
-    let keyword = input.trim();
-    if (!keyword) {
-        clearSearchKey();
-        return;
-    }
-
-    const $category = $('input[name="cs-search__category-checkbox"]:checked');
-    const $location = $('.cs-search-box__selection--location #search-box__location-search-id');
-    let transaction = $('#cs-search__tab-actived').val() ?? 1;
-    let categoryId = $category.val();
-    let locationSearchId = $location.val();
-    let locationFriendlyUrl = $location.attr('data-friendly-url');
-    $.ajax({
-        url: '/api/suggest-location',
-        method: 'POST',
-        data: JSON.stringify({
-            keyword: keyword,
-            transactionType: transaction,
-            categoryId: categoryId,
-            locationSearchId: locationSearchId,
-            locationFriendlyUrl: locationFriendlyUrl
-        }),
-        contentType: 'application/json',
-        success: function (response) {
-            if (accessRedirect) {
-                redirectToSearchPage(response.Data[0].DisplayName, response.Data[0].RedirectUrl)
-            }
-            else {
-                suggetionLoaded = {
-                    keyword: keyword,
-                    res: response.Data[0]
-                };
-            }
-            $('.cs-search-box__suggestion--result .cs-search-box__suggestion--content').empty();
-            if (response && response.Success && response.Data && response.Data.length > 0) {
-                response.Data.forEach(item => {
-                    $('.cs-search-box__suggestion--result .cs-search-box__suggestion--content').append(buildSuggestionItem(input, item.DisplayName, item.RedirectUrl));
-                });
-            }
-        },
-        error: function (xhr, status, error) {
-        },
-        complete: function () {
-            if (!accessRedirect) {
-                $('.cs-search-box__suggestion').show();
-            }
-            $('.cs-search-box__suggestion--history').hide();
-            $('.cs-search-box__suggestion--result').show();
-            turnOffLoader();
-        }
-    });
-}
-
-function getProjectSuggestion(input, accessRedirect = null) {
-    let keyword = input.trim();
-    if (!keyword) {
-        clearSearchKey();
-        return;
-    }
-    const $location = $('.cs-search-box__selection--location #search-box__location-search-id');
-    let transaction = $('#cs-search__tab-actived').val() ?? 1;
-    let locationSearchId = $location.val();
-    $.ajax({
-        url: 'api/suggest-project',
-        method: 'POST',
-        data: JSON.stringify({
-            keyword: keyword,
-            transactionType: transaction,
-            locationSearchId: locationSearchId
-        }),
-        contentType: 'application/json',
-        success: function (response) {
-            if (accessRedirect) {
-                redirectToSearchPage(response.Data[0].DisplayName, response.Data[0].RedirectUrl)
-            }
-            else {
-                suggetionLoaded = {
-                    keyword: keyword,
-                    res: response.Data[0]
-                };
-            }
-            $('.cs-search-box__suggestion--result .cs-search-box__suggestion--content').empty();
-            if (response && response.Success && response.Data && response.Data.length > 0) {
-                response.Data.forEach(item => {
-                    $('.cs-search-box__suggestion--result .cs-search-box__suggestion--content').append(buildSuggestionItem(input, item.DisplayName, item.RedirectUrl));
-                });
-            }
-        },
-        error: function (xhr, status, error) {
-        },
-        complete: function () {
-            $('.cs-search-box__suggestion').show();
-            $('.cs-search-box__suggestion--history').hide();
-            $('.cs-search-box__suggestion--result').show();
-            turnOffLoader();
-        }
-    });
 }
 
 function clearSearchKey() {
@@ -762,14 +708,18 @@ function updateSearchBoxStorage(transaction, cityId, districtId, wardId, categor
     if (wardId != '') searchBoxStorage.wardId = wardId;
     if (categoryId != '') searchBoxStorage.categoryId = categoryId;
 
-    localStorage.setItem('tvnd-search-box', JSON.stringify(searchBoxStorage));
+    localStorage.setItem('actd-search-box', JSON.stringify(searchBoxStorage));
 }
 
 function getSearchBoxStorage() {
     let storage = {};
-    let storageStr = localStorage.getItem('tvnd-search-box');
+    let storageStr = localStorage.getItem('actd-search-box');
     if (storageStr) {
         storage = JSON.parse(storageStr);
     }
     return storage;
 }
+
+window.displayHistory = displayHistory;
+window.resetPlaceholderRunning = resetPlaceholderRunning;
+window.fetchCategories = fetchCategories;
