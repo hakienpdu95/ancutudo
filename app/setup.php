@@ -600,7 +600,8 @@ function actd_get_provinces() {
         SELECT id, name, short_name, province_code, place_type 
         FROM wp_provinces 
         WHERE is_active = 1 
-        ORDER BY name ASC
+          AND province_code IN ('01', '24')
+        ORDER BY FIELD(province_code, '01', '24')
     ");
     wp_send_json_success($provinces);
 }
