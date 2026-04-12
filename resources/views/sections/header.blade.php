@@ -21,8 +21,8 @@
 	                    <a class="logo mobile-logo-scroll" href="/" style="display: flex; align-items: center; width: 100% !important; top: 4px; position: absolute;">
 	                        <img id="logo-img-mobile" alt="Logo" src="https://cdn.thuviennhadat.vn/upload/images/logo/Logo-TVND.png" class="img-fluid" width="48" height="48" loading="lazy">
 	                        <strong class="brand-name" style="font-size: 22px; padding-top: 0; padding-left: 5px;">
-	                            <span class="br-1">ThuVien</span>
-	                            <span class="br-2">NhaDat</span>
+	                            <span class="br-1">AnCu</span>
+	                            <span class="br-2">TuDo</span>
 	                            <span class="br-3" style="top: -14px;">.vn</span>
 	                        </strong>
 	                    </a>
@@ -96,8 +96,8 @@
 	                    <div style="display:flex; flex-direction:column; margin-top:-15px">
 	                        <a class="logo" href="/" style="margin-right: 10px; margin-left: 5px">
 	                            <strong class="brand-name" style="font-size: 22px;">
-	                                <span class="br-1">ThuVien</span>
-	                                <span class="br-2">NhaDat</span>
+	                                <span class="br-1">AnCu</span>
+	                                <span class="br-2">TuDo</span>
 	                                <span class="br-3">.vn</span>
 	                            </strong>
 	                        </a>
@@ -110,251 +110,11 @@
 	                            <span class="slogan-actd">...hiểu pháp lý, rõ quy hoạch, giao dịch nhanh...</span>
 	                        </div>
 	                    </div>
-	                    <div class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
-	                        <a class="dropdown-title link-header text-primary text-bold" href="/ban-nha-dat-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header">Nhà đất bán</a>
-	                        <div class="menu" tabindex="-1">
-	                            <a href="/ban-can-ho-chung-cu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Căn hộ chung cư </div>
-	                            </a>
-	                            <a href="/ban-nha-tai-dinh-cu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà tái định cư </div>
-	                            </a>
-	                            <a href="/ban-chung-cu-mini-can-ho-dich-vu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Chung cư mini, căn hộ dịch vụ </div>
-	                            </a>
-	                            <a href="/ban-nha-rieng-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà riêng </div>
-	                            </a>
-	                            <a href="/ban-nha-biet-thu-lien-ke-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà biệt thự, liền kề </div>
-	                            </a>
-	                            <a href="/ban-nha-mat-pho-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà mặt phố </div>
-	                            </a>
-	                            <a href="/ban-nha-pho-thuong-mai-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà phố thương mại </div>
-	                            </a>
-	                            <a href="/ban-shop-house-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Shophouse </div>
-	                            </a>
-	                            <a href="/ban-condotel-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Condotel </div>
-	                            </a>
-	                            <a href="/ban-dat-o-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Đất </div>
-	                            </a>
-	                            <a href="/ban-dat-nen-du-an-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Đất nền dự án </div>
-	                            </a>
-	                            <a href="/ban-kho-nha-xuong-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Kho, nhà xưởng </div>
-	                            </a>
-	                            <a href="/ban-bat-dong-san-khac-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Bất động sản khác </div>
-	                            </a>
-	                        </div>
-	                    </div>
-	                    <div class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
-	                        <a class="dropdown-title link-header text-primary text-bold" href="/cho-thue-nha-dat-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header">Nhà đất cho thuê</a>
-	                        <div class="menu" tabindex="-1">
-	                            <a href="/cho-thue-can-ho-chung-cu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Căn hộ chung cư </div>
-	                            </a>
-	                            <a href="/cho-thue-chung-cu-mini-can-ho-dich-vu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Chung cư mini, căn hộ dịch vụ </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-rieng-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà riêng </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-biet-thu-lien-ke-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà biệt thự, liền kề </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-mat-pho-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà mặt phố </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-pho-thuong-mai-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà phố thương mại </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-tai-dinh-cu-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà tái định cư </div>
-	                            </a>
-	                            <a href="/cho-thue-shop-house-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Shophouse </div>
-	                            </a>
-	                            <a href="/cho-thue-condotel-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Condotel </div>
-	                            </a>
-	                            <a href="/cho-thue-nha-tro-phong-tro-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà trọ, phòng trọ </div>
-	                            </a>
-	                            <a href="/cho-thue-van-phong-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Văn phòng </div>
-	                            </a>
-	                            <a href="/cho-thue-cua-hang-ki-ot-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Mặt bằng kinh doanh, cửa hàng, kiot </div>
-	                            </a>
-	                            <a href="/cho-thue-kho-nha-xuong-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Kho, nhà xưởng </div>
-	                            </a>
-	                            <a href="/cho-thue-bat-dong-san-khac-toan-quoc?utm_source=thuviennhadat_trangchu&amp;utm_medium=internal&amp;utm_campaign=rao_vat_tu_trangchu&amp;utm_content=menu_header" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Bất động sản khác </div>
-	                            </a>
-	                        </div>
-	                    </div>
-	                    <div class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
-	                        <a class="dropdown-title link-header text-primary text-bold" href="/du-an-bat-dong-san">Dự án</a>
-	                        <div class="menu" tabindex="-1">
-	                            <a href="/du-an-can-ho-chung-cu" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Căn hộ chung cư </div>
-	                            </a>
-	                            <a href="/du-an-nha-tai-dinh-cu" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà tái định cư </div>
-	                            </a>
-	                            <a href="/du-an-cao-oc-van-phong" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Cao ốc văn phòng </div>
-	                            </a>
-	                            <a href="/du-an-dat-chan-nuoi" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Đất chăn nuôi </div>
-	                            </a>
-	                            <a href="/du-an-trung-tam-thuong-mai" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Trung tâm thương mại </div>
-	                            </a>
-	                            <a href="/du-an-biet-thu-lien-ke" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Biệt thự, liền kề </div>
-	                            </a>
-	                            <a href="/du-an-nha-mat-pho" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà mặt phố </div>
-	                            </a>
-	                            <a href="/du-an-nha-hem" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà hẻm </div>
-	                            </a>
-	                            <a href="/du-an-khu-do-thi-moi" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Khu đô thị mới </div>
-	                            </a>
-	                            <a href="/du-an-khu-phuc-hop" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Khu phức hợp </div>
-	                            </a>
-	                            <a href="/du-an-nha-o-xa-hoi" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Nhà ở xã hội </div>
-	                            </a>
-	                            <a href="/du-an-khu-cong-nghiep" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Khu công nghiệp </div>
-	                            </a>
-	                            <a href="/du-an-khac" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Dự án khác </div>
-	                            </a>
-	                            <a href="/du-an-shophouse" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Shophouse </div>
-	                            </a>
-	                            <a href="/du-an-dat-nen" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Đất nền </div>
-	                            </a>
-	                            <a href="/du-an-condotel" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Condotel </div>
-	                            </a>
-	                        </div>
-	                    </div>
-	                    <div class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
-	                        <a class="dropdown-title link-header text-primary text-bold">Môi giới</a>
-	                        <div class="menu" tabindex="-1">
-	                            <a href="/nha-moi-gioi" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Chuyên trang môi giới </div>
-	                            </a>
-	                            <a href="/moi-gioi" style="color:black;font-size:14px!important">
-	                                <div class="item py-item"> Danh bạ môi giới </div>
-	                            </a>
-	                        </div>
-	                    </div>
-	                    <div id="mn-tt-bds" class="ui simple dropdown item dropdown-container p-5 padding-header" tabindex="0">
-	                        <a class="dropdown-title link-header text-primary text-bold"> Thông tin BĐS <div class="floating ui red label lable-animation"></div>
-	                        </a>
-	                        <div class="menu" style="min-width:250px !important" tabindex="-1">
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/bang-gia-dat-moi-nhat-2026" style="color:black!important;"> Bảng giá đất 2026 <strong style="padding: 2px 5px; background-color: #DB2828; color: white; border-radius: 2px; font-size: 11px">Mới</strong>
-	                                </a>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/phap-ly-nha-dat" style="color:black!important;"> Pháp lý nhà đất <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/phap-ly-nha-dat/chinh-sach-moi-ve-nha-dat" style="color:black!important;">Chính sách mới về nhà đất</a>
-	                                    <a class="item" href="/phap-ly-nha-dat/ho-so-thu-tuc-nha-dat" style="color:black!important;">Hồ sơ, thủ tục nhà đất</a>
-	                                    <a class="item" href="/phap-ly-nha-dat/phap-luat-ve-bat-dong-san" style="color:black!important;">Pháp luật về bất động sản</a>
-	                                    <a class="item" href="/phap-ly-nha-dat/quy-hoach-dat-dai" style="color:black!important;">Quy hoạch đất đai</a>
-	                                    <a class="item" href="/phap-ly-nha-dat/thong-tin-bat-dong-san" style="color:black!important;">Thông tin bất động sản</a>
-	                                    <a class="item" href="/phap-ly-nha-dat/tu-van-phap-ly-nha-dat" style="color:black!important;">Tư vấn pháp lý nhà đất</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/bat-dong-san" style="color:black!important;"> Bất động sản <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/bat-dong-san/du-an-nha-dat" style="color:black!important;">Dự án Nhà đất</a>
-	                                    <a class="item" href="/bat-dong-san/mua-ban-nha-dat" style="color:black!important;">Mua bán Nhà đất</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/cam-nang-nha-dat" style="color:black!important;"> Cẩm nang nhà đất <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/cam-nang-nha-dat/kinh-nghiem-mua-ban-cho-thue" style="color:black!important;">Kinh nghiệm mua bán cho thuê</a>
-	                                    <a class="item" href="/cam-nang-nha-dat/phong-thuy-nha-dat" style="color:black!important;">Phong thủy nhà đất</a>
-	                                    <a class="item" href="/cam-nang-nha-dat/thuat-ngu-nha-dat" style="color:black!important;">Thuật ngữ nhà đất</a>
-	                                    <a class="item" href="/cam-nang-nha-dat/vat-lieu-xay-dung" style="color:black!important;">Vật liệu xây dựng</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/tai-chinh-bat-dong-san" style="color:black!important;"> Tài chính bất động sản </a>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/thi-truong-bat-dong-san" style="color:black!important;"> Thị trường bất động sản </a>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/khong-gian-song" style="color:black!important;"> Không gian sống <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/khong-gian-song/nha-dep-vuon-dep" style="color:black!important;">Nhà đẹp, vườn đẹp</a>
-	                                    <a class="item" href="/khong-gian-song/noi-that-ngoai-that" style="color:black!important;">Nội thất, ngoại thất</a>
-	                                    <a class="item" href="/khong-gian-song/thiet-bi-gia-dung" style="color:black!important;">Thiết bị gia dụng</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/phap-luat" style="color:black!important;"> Pháp luật <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/phap-luat/chi-dao-dieu-hanh" style="color:black!important;">Chỉ đạo - Điều hành</a>
-	                                    <a class="item" href="/phap-luat/dat-dai-va-nha-o" style="color:black!important;">Đất đai và Nhà ở</a>
-	                                    <a class="item" href="/phap-luat/ha-tang-bat-dong-san" style="color:black!important;">Hạ tầng bất động sản</a>
-	                                    <a class="item" href="/phap-luat/van-ban-moi" style="color:black!important;">Văn bản mới</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/hoi-dap" style="color:black!important;"> Hỏi đáp Pháp luật nhà đất <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/hoi-dap/boi-thuong-tai-dinh-cu" style="color:black!important;">Bồi thường, tái định cư</a>
-	                                    <a class="item" href="/hoi-dap/dau-tu-xay-dung" style="color:black!important;">Đầu tư xây dựng</a>
-	                                    <a class="item" href="/hoi-dap/giao-dich-nha-dat" style="color:black!important;">Giao dịch nhà đất</a>
-	                                    <a class="item" href="/hoi-dap/hoi-dap-khac" style="color:black!important;">Hỏi đáp khác</a>
-	                                    <a class="item" href="/hoi-dap/tai-chinh-nha-dat" style="color:black!important;">Tài chính nhà đất</a>
-	                                    <a class="item" href="/hoi-dap/thu-tuc-hanh-chinh-nha-dat" style="color:black!important;">Thủ tục hành chính nhà đất</a>
-	                                </div>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a href="/van-ban-phap-luat-viet-nam" style="color:black!important;"> Văn bản Pháp luật </a>
-	                            </div>
-	                            <div class="item" style="padding: 8px 3px 8px 15px !important">
-	                                <a style="color:black!important;"> Tiện ích hỗ trợ <i class="angle right icon" style="float:right; font-size:15px !important"></i>
-	                                </a>
-	                                <div class="menu">
-	                                    <a class="item" href="/sap-nhap-tinh" style="color:black!important;">Tra cứu sáp nhập tỉnh</a>
-	                                    <a class="item" href="/bang-gia-dat" style="color:black!important;">Tra cứu bảng giá đất</a>
-	                                    <a class="item" href="/tinh-du-toan-vat-lieu-xay-nha" style="color:black!important;">Tính dự toán xây nhà</a>
-	                                    <a class="item" href="/tinh-lai-suat-vay" style="color:black!important;">Tính lãi suất vay</a>
-	                                </div>
-	                            </div>
-	                        </div>
-	                    </div>
+	                    @if (has_nav_menu('primary_navigation'))
+						<nav class="nav-menu">
+							{!! wp_nav_menu(['theme_location' => 'primary_navigation', 'menu_class' => 'nav', 'echo' => false]) !!}
+						</nav>
+						@endif
 	                </div>
 	                <div style="display:flex; padding: 0;">
 	                    <div id="content-login" class="item" style="display: flex; padding: 0; width: 100%; align-items: center; justify-content: flex-end; gap: .5rem;">
