@@ -627,51 +627,77 @@
         function sage_bds_info($post = null): array {
             $post = get_post($post);
             if (!$post) {
-                return ['price' => 'Liên hệ', 'area' => '—', 'location' => 'Chưa cập nhật', 'type' => ''];
+                return [];
             }
 
             static $cache = [];
-            $cacheKey = $post->ID;
-            if (isset($cache[$cacheKey])) {
-                return $cache[$cacheKey];
+            $key = $post->ID;
+            if (isset($cache[$key])) {
+                return $cache[$key];
             }
 
-            $pt   = $post->post_type;
+            $pt = $post->post_type;
             $data = ['post_type' => $pt];
 
             if ($pt === 'property-for-sale') {
-                $data['price']    = sage_format_bds_price((float) cmeta('price'));
-                $area             = cmeta('land_area') ?: cmeta('usable_area');
-                $data['area']     = sage_format_bds_area((float) $area);
-                $data['location'] = cmeta('address_detail') ?: 'Chưa cập nhật';
-
-                $type = cmeta('property_type');
-                $data['type'] = match($type) {
-                    'house'     => 'Nhà riêng',
-                    'apartment' => 'Căn hộ chung cư',
-                    'land'      => 'Đất thổ cư',
-                    default     => 'Bất động sản',
-                };
-
-            } elseif ($pt === 'property-for-rent') {
+                $data = [
+                    'price'            => sage_format_bds_price((float) cmeta('price')),
+                    'area'             => sage_format_bds_area((float) (cmeta('land_area') ?: cmeta('usable_area'))),
+                    'location'         => cmeta('address_detail') ?: 'Chưa cập nhật',
+                    'type'             => match(cmeta('property_type')) {
+                        'house'     => 'Nhà riêng',
+                        'apartment' => 'Căn hộ chung cư',
+                        'land'      => 'Đất thổ cư',
+                        default     => 'Bất động sản',
+                    },
+                    'legal'            => match(cmeta('property_type')) {
+                        'house'     => cmeta('legal_house'),
+                        'apartment' => cmeta('legal_apartment'),
+                        'land'      => cmeta('legal_land'),
+                        default     => '',
+                    },
+                    'width'            => cmeta('width'),
+                    'length'           => cmeta('length'),
+                    'land_area'        => cmeta('land_area'),
+                    'usable_area'      => cmeta('usable_area'),
+                    'direction'        => cmeta('direction'),
+                    'floors'           => cmeta('floors'),
+                    'bedrooms'         => cmeta('bedrooms'),
+                    'bathrooms'        => cmeta('bathrooms'),
+                    'project_name'     => cmeta('project_name'),
+                    'apartment_address'=> cmeta('apartment_address'),
+                    'net_area'         => cmeta('net_area'),
+                    'usage_status'     => cmeta('usage_status'),
+                    'interior_status'  => cmeta('interior_status'),
+                    'urgent_sale'      => (bool) cmeta('urgent_sale'),
+                    'urgent_days'      => cmeta('urgent_days'),
+                    'front_road_width' => cmeta('front_road_width'),
+                ];
+            } 
+            elseif ($pt === 'property-for-rent') {
                 $rent = (int) cmeta('rent_monthly_rent');
-                $data['price'] = $rent >= 1000000
-                    ? number_format($rent / 1000000, 0) . ' triệu/tháng'
-                    : number_format($rent) . ' VNĐ/tháng';
-
-                $data['area']     = sage_format_bds_area((float) cmeta('rent_usable_area'));
-                $data['location'] = cmeta('rent_address_detail') ?: 'Chưa cập nhật';
-
-                $type = cmeta('rent_property_type');
-                $data['type'] = match($type) {
-                    'house'     => 'Nhà riêng',
-                    'apartment' => 'Căn hộ chung cư',
-                    'layout'    => 'Mặt bằng',
-                    default     => 'Cho thuê',
-                };
+                $data = [
+                    'price'            => $rent >= 1000000 
+                        ? number_format($rent / 1000000, 0) . ' triệu/tháng' 
+                        : number_format($rent) . ' VNĐ/tháng',
+                    'area'             => sage_format_bds_area((float) cmeta('rent_usable_area')),
+                    'location'         => cmeta('rent_address_detail') ?: 'Chưa cập nhật',
+                    'type'             => match(cmeta('rent_property_type')) {
+                        'house'     => 'Nhà riêng',
+                        'apartment' => 'Căn hộ chung cư',
+                        'layout'    => 'Mặt bằng',
+                        default     => 'Cho thuê',
+                    },
+                    'bedrooms'         => cmeta('rent_bedrooms'),
+                    'bathrooms'        => cmeta('rent_bathrooms'),
+                    'floors'           => cmeta('rent_floors'),
+                    'interior_status'  => cmeta('rent_interior_status'),
+                    'rental_period'    => cmeta('rent_rental_period'),
+                    'deposit'          => cmeta('rent_deposit'),
+                ];
             }
 
-            return $cache[$cacheKey] = $data;
+            return $cache[$key] = $data;
         }
     }
 
