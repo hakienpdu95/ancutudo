@@ -27,6 +27,6 @@ class PropertyForSalePostType extends BasePostType {
 
     protected function useDefaultCategory(): bool
     {
-        return true; 
+        return false; 
     }
 }

@@ -27,6 +27,6 @@ class PropertyForRentPostType extends BasePostType {
 
     protected function useDefaultCategory(): bool
     {
-        return true; 
+        return false; 
     }
 }

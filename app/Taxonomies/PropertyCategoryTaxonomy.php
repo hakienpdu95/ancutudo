@@ -1,20 +1,20 @@
 <?php namespace App\Taxonomies;
 
-class PropertyFeatureTaxonomy extends BaseTaxonomy
+class PropertyCategoryTaxonomy extends BaseTaxonomy
 {
 	protected function getTaxonomyKey(): string
     {
-        return 'property-feature';
+        return 'property-category';
     }
 
     protected function getSingular(): string
     {
-        return 'Ưu điểm nổi bật';
+        return 'Danh mục BĐS';
     }
 
     protected function getPlural(): string
     {
-        return 'Ưu điểm nổi bật';
+        return 'Danh mục BĐS';
     }
 
     protected function getPostTypes(): array
@@ -26,7 +26,7 @@ class PropertyFeatureTaxonomy extends BaseTaxonomy
     {
         $args = parent::getArgs();
         $args['hierarchical'] = true;          
-        $args['rewrite'] = ['slug' => 'uu-diem-noi-bat'];
+        $args['rewrite'] = ['slug' => 'danh-muc-bds'];
         return $args;
     }
 }
