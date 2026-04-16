@@ -688,6 +688,20 @@ add_filter('query_vars', function ($vars) {
     return $vars;
 });
 
+add_action('init', function () {
+    // Tạo rewrite rule cho 2 CPT
+    add_rewrite_rule(
+        '^nha-dat-ban/([^/]+)/?$',
+        'index.php?post_type=property-for-sale&property-category=$matches[1]',
+        'top'
+    );
+    add_rewrite_rule(
+        '^nha-dat-thue/([^/]+)/?$',
+        'index.php?post_type=property-for-rent&property-category=$matches[1]',
+        'top'
+    );
+}, 10);
+
 // ====================== FILTER LOCATION CHO CPT BĐS (EAV) ======================
 add_action('pre_get_posts', function ($query) {
     if (is_admin() || !$query->is_main_query()) {
@@ -695,9 +709,18 @@ add_action('pre_get_posts', function ($query) {
     }
 
     $post_type = $query->get('post_type');
+    $term_slug = $query->get('property-category');
 
+    $query->set('tax_query', [
+        [
+            'taxonomy' => 'property-category',
+            'field'    => 'slug',
+            'terms'    => $term_slug,
+        ]
+    ]);
+    
     // Chỉ áp dụng cho 2 CPT bất động sản của bạn
-    if (!in_array($post_type, ['property-for-sale', 'property-for-rent'])) {
+    if (!$term_slug || !in_array($post_type, ['property-for-sale', 'property-for-rent'])) {
         return;
     }
 
