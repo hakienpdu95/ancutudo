@@ -375,39 +375,33 @@ function filterLocation(input, className) {
 // ====================== SUBMIT SEARCH – TẤT CẢ TAB ĐỀU LÀ CATEGORY ======================
 function submitSearch(input) {
     let keyword = (input || "").trim();
-
     const $category = $('input[name="cs-search__category-checkbox"]:checked');
     const $location = $('.cs-search-box__selection--location #search-box__location-search-id');
 
     let type = $('.cs-search__tab-item.active').data('type');
-
-    // Base URL động
-    let base = actdAjax.homeurl.endsWith('/') ? actdAjax.homeurl : actdAjax.homeurl + '/';
-
-    let path;
+    
+    let path = '';
 
     if (type === 'project') {
-        // Tab Dự án cũng là category
-        path = `category/du-an-bat-dong-san`;
+        path = 'du-an-bat-dong-san';                    // giữ nguyên nếu bạn vẫn muốn dùng slug này
     } else {
-        let prefix = (type === 'rent') ? 'cho-thue' : 'ban';
-        let parentSlug = `${prefix}-nha-dat-toan-quoc`;
+        // ==================== SỬA Ở ĐÂY ====================
+        let cptSlug = (type === 'rent') ? 'nha-dat-thue' : 'nha-dat-ban';
+        path = cptSlug;
 
-        // Có chọn loại hình cụ thể hay không
-        let categorySlug = ($category.length > 0 && $category.val() !== "")
-            ? $category.attr('data-friendly-url')
+        let categorySlug = ($category.length > 0 && $category.val() !== "") 
+            ? $category.attr('data-friendly-url') 
             : null;
 
-        path = `category/${parentSlug}`;
         if (categorySlug) {
             path += `/${categorySlug}`;
         }
     }
 
-    // Query params
     let params = new URLSearchParams();
     if (keyword) params.append('q', keyword);
 
+    // province_code & ward_code (đã đúng, giữ nguyên)
     const locationId = $location.val() || '';
     if (locationId.startsWith('c')) {
         params.append('province_code', locationId.substring(1));
@@ -416,12 +410,10 @@ function submitSearch(input) {
     }
 
     let queryString = params.toString() ? '?' + params.toString() : '';
-
-    let finalPath = path + queryString;
+    let finalPath = '/' + path + queryString;   // thêm / đầu cho an toàn
 
     redirectToSearchPage(null, finalPath);
 }
-
 // ====================== REDIRECT – ĐỘNG ROOT DOMAIN ======================
 function redirectToSearchPage(displayName, redirectUrl) {
     let type = $('.cs-search__tab-item.active').data('type') == 'project' ? 'project' : 'post';

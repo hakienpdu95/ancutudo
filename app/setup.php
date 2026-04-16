@@ -631,10 +631,11 @@ add_action('wp_ajax_nopriv_get_categories_by_tab', '\App\actd_get_categories_by_
 
 function actd_get_categories_by_tab() {
     $transaction = intval($_GET['transaction'] ?? 1);
+    
+    $taxonomy = 'property-type';   
 
-    // === ĐIỀN DANH SÁCH TAG_ID CỦA BẠN VÀO ĐÂY ===
-    $sale_ids = [4];     // ← Thay bằng tag_ID thật của tab MUA BÁN
-    $rent_ids = [5];     // ← Thay bằng tag_ID thật của tab CHO THUÊ
+    $sale_ids = [4];  
+    $rent_ids = [5];  
 
     $include = ($transaction === 2) ? $rent_ids : $sale_ids;
 
@@ -643,10 +644,10 @@ function actd_get_categories_by_tab() {
     }
 
     $categories = get_terms([
-        'taxonomy'   => 'category',
+        'taxonomy'   => $taxonomy,
         'hide_empty' => false,
         'include'    => $include,
-        'orderby'    => 'include',   // giữ đúng thứ tự bạn liệt kê
+        'orderby'    => 'include', 
     ]);
 
     if (is_wp_error($categories)) {
@@ -658,7 +659,7 @@ function actd_get_categories_by_tab() {
             'Id'           => $cat->term_id,
             'CategoryName' => $cat->name,
             'FriendlyUrl'  => $cat->slug,
-            'ImageIcon'    => ''   // nếu sau này có icon thì bổ sung
+            'ImageIcon'    => ''   // sau này bạn thêm icon SVG vào term meta cũng được
         ];
     }, $categories);
 
