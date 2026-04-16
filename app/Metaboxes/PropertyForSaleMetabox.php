@@ -397,5 +397,19 @@ class PropertyForSaleMetabox extends BaseMetabox
     {
         parent::__construct();
         add_action('rwmb_after', [self::class, 'jsFallback']);
+
+        add_action('rwmb_after_save_post', function ($post_id) {
+            if (!current_user_can('edit_post', $post_id)) {
+                return;
+            }
+
+            $post_type = get_post_type($post_id);
+
+            if ($post_type === 'property-for-sale' && isset($_POST['property_images'])) {
+                $images = $_POST['property_images'];
+                $images = is_array($images) ? array_map('intval', $images) : [];
+                update_post_meta($post_id, 'property_images', $images);
+            }
+        }, 20);
     }
 }

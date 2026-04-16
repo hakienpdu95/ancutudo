@@ -1,172 +1,125 @@
 <?php
 
-if (!function_exists('cmeta')) {
-    function cmeta(string $key = '', $post_id = null, array $args = []) {
-        $post_id = $post_id ?? get_the_ID();
-        $value = null;
+    if (!function_exists('cmeta')) {
+        function cmeta(string $key = '', $post_id = null, array $args = []) {
+            $post_id = $post_id ?? get_the_ID();
+            $value = null;
 
-        if (class_exists(\App\Database\CustomTableManager::class)) {
-            $value = \App\Database\CustomTableManager::getMeta((int)$post_id, $key);
-        } elseif (function_exists('rwmb_meta')) {
-            $value = rwmb_meta($key, $args, $post_id);
-        }
+            if (class_exists(\App\Database\CustomTableManager::class)) {
+                $value = \App\Database\CustomTableManager::getMeta((int)$post_id, $key);
+            } elseif (function_exists('rwmb_meta')) {
+                $value = rwmb_meta($key, $args, $post_id);
+            }
 
-        // === FIX FLAGS: Luôn trả về array cho checkbox_list ===
-        if ($key === 'flags' || str_contains($key, 'flag')) {
-            if (is_string($value)) {
-                $decoded = json_decode($value, true);
-                if (is_array($decoded)) {
-                    return $decoded;
+            // === FIX FLAGS: Luôn trả về array cho checkbox_list ===
+            if ($key === 'flags' || str_contains($key, 'flag')) {
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if (is_array($decoded)) {
+                        return $decoded;
+                    }
+                    return [$value]; // 'breaking' → ['breaking']
                 }
-                return [$value]; // 'breaking' → ['breaking']
+                if (!is_array($value)) {
+                    return $value ? [$value] : [];
+                }
             }
-            if (!is_array($value)) {
-                return $value ? [$value] : [];
+
+            return $value;
+        }
+    }
+
+    // Helper cache file list (static + transient) – DÙNG CHO AUTO REGISTER
+    if (!function_exists('sage_get_files')) {
+        function sage_get_files(string $folder, string $exclude = ''): array {
+            static $cache = [];
+            $key = md5($folder . $exclude);
+            if (isset($cache[$key])) return $cache[$key];
+            if (!is_dir($folder)) return [];
+            $files = glob($folder . '/*.php');
+            if ($exclude) {
+                $files = array_filter($files, fn($f) => basename($f) !== $exclude);
             }
+            $cache[$key] = $files;
+            return $files;
         }
-
-        return $value;
     }
-}
 
-// Helper cache file list (static + transient) – DÙNG CHO AUTO REGISTER
-if (!function_exists('sage_get_files')) {
-    function sage_get_files(string $folder, string $exclude = ''): array {
-        static $cache = [];
-        $key = md5($folder . $exclude);
-        if (isset($cache[$key])) return $cache[$key];
-        if (!is_dir($folder)) return [];
-        $files = glob($folder . '/*.php');
-        if ($exclude) {
-            $files = array_filter($files, fn($f) => basename($f) !== $exclude);
+    // Helper bổ sung (tương lai scale)
+    if (!function_exists('cpost')) {
+        function cpost($post_id = null) {
+            return get_post($post_id ?? get_the_ID());
         }
-        $cache[$key] = $files;
-        return $files;
     }
-}
 
-// Helper bổ sung (tương lai scale)
-if (!function_exists('cpost')) {
-    function cpost($post_id = null) {
-        return get_post($post_id ?? get_the_ID());
+    if (!function_exists('cterm_meta')) {
+        /**
+         * Lấy Term Meta (Taxonomy Meta) siêu dễ – dùng với Meta Box
+         * Ví dụ: cterm_meta('thumbnail_id'), cterm_meta('icon')
+         */
+        function cterm_meta(string $key, $term_id = null, array $args = []) {
+            $term_id = $term_id ?? get_queried_object_id();
+            if (!$term_id) return null;
+
+            return rwmb_meta($key, ['object_type' => 'term'] + $args, $term_id);
+        }
     }
-}
 
-if (!function_exists('cterm_meta')) {
     /**
-     * Lấy Term Meta (Taxonomy Meta) siêu dễ – dùng với Meta Box
-     * Ví dụ: cterm_meta('thumbnail_id'), cterm_meta('icon')
+     * Lấy Theme Option với cache (siêu nhanh)
      */
-    function cterm_meta(string $key, $term_id = null, array $args = []) {
-        $term_id = $term_id ?? get_queried_object_id();
-        if (!$term_id) return null;
-
-        return rwmb_meta($key, ['object_type' => 'term'] + $args, $term_id);
-    }
-}
-
-/**
- * Lấy Theme Option với cache (siêu nhanh)
- */
-if (!function_exists('theme_option')) {
-    function theme_option(string $key, $default = null)
-    {
-        return \App\CMB2\ThemeOptions::get($key, $default);
-    }
-}
-
-if (!function_exists('tmeta')) {
-    function tmeta(string $key, int $term_id = 0)
-    {
-        if ($term_id === 0) {
-            $term = get_queried_object();
-            $term_id = $term->term_id ?? 0;
+    if (!function_exists('theme_option')) {
+        function theme_option(string $key, $default = null)
+        {
+            return \App\CMB2\ThemeOptions::get($key, $default);
         }
-        return get_term_meta($term_id, $key, true);
     }
-}
 
-if (!function_exists('get_toc')) {
-    function get_toc() {
-        if (!is_singular()) return [];
+    if (!function_exists('tmeta')) {
+        function tmeta(string $key, int $term_id = 0)
+        {
+            if ($term_id === 0) {
+                $term = get_queried_object();
+                $term_id = $term->term_id ?? 0;
+            }
+            return get_term_meta($term_id, $key, true);
+        }
+    }
 
-        $content = get_post_field('post_content', get_the_ID());
-        $headings = [];
+    if (!function_exists('get_toc')) {
+        function get_toc() {
+            if (!is_singular()) return [];
 
-        preg_match_all('/<h([2-4])([^>]*)id="([^"]+)"([^>]*)>(.*?)<\/h\1>/is', $content, $matches, PREG_SET_ORDER);
+            $content = get_post_field('post_content', get_the_ID());
+            $headings = [];
 
-        foreach ($matches as $m) {
-            $headings[] = [
-                'level' => (int)$m[1],
-                'id'    => $m[3],
-                'text'  => wp_strip_all_tags($m[5])
+            preg_match_all('/<h([2-4])([^>]*)id="([^"]+)"([^>]*)>(.*?)<\/h\1>/is', $content, $matches, PREG_SET_ORDER);
+
+            foreach ($matches as $m) {
+                $headings[] = [
+                    'level' => (int)$m[1],
+                    'id'    => $m[3],
+                    'text'  => wp_strip_all_tags($m[5])
+                ];
+            }
+
+            return $headings;
+        }
+    }
+
+    if (!function_exists('sage_menu')) {
+        function sage_menu(string $location, array $args = []): string
+        {
+            $defaults = [
+                'theme_location' => $location,
+                'container'      => false,
+                'echo'           => false,
+                'fallback_cb'    => false,
             ];
+            return wp_nav_menu(array_merge($defaults, $args));
         }
-
-        return $headings;
-    }
-}
-
-if (!function_exists('sage_menu')) {
-    function sage_menu(string $location, array $args = []): string
-    {
-        $defaults = [
-            'theme_location' => $location,
-            'container'      => false,
-            'echo'           => false,
-            'fallback_cb'    => false,
-        ];
-        return wp_nav_menu(array_merge($defaults, $args));
-    }
-}
-
-/**
- * Social Icons 
- */
-if (!function_exists('sage_social_icons')) {
-    function sage_social_icons(
-        string $location = 'social_navigation',
-        string $wrapper_class = 'flex items-center gap-6 text-2xl',
-        array $custom_icons = []
-    ): string {
-        $items = wp_get_nav_menu_items($location);
-        if (empty($items)) {
-            return '';
-        }
-
-        // Icon map mặc định (dễ override qua filter)
-        $icon_map = apply_filters('sage/social_icons/map', [
-            'facebook'  => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>',
-            'instagram' => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.849.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>',
-            'youtube'   => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.5 6.186C0 8.07 0 12 0 12s0 3.93.5 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
-            'tiktok'    => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.228C19.59 5.14 18.72 4.27 17.63 4.27H6.37C5.28 4.27 4.41 5.14 4.41 6.23v11.54c0 1.09.87 1.96 1.96 1.96h11.26c1.09 0 1.96-.87 1.96-1.96V6.23z"/><path d="M15.5 12.5v-1.5h-1.5v1.5H15.5zM10.5 15.5V9h1.5v6.5H10.5z"/></svg>',
-            'x.com'     => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25l-4.244 5.38L7.5 2.25H2.25l6.188 8.25-6.188 8.25H7.5l4.5-5.7 4.5 5.7h5.25L13.5 10.5 19.5 2.25z"/></svg>',
-            'linkedin'  => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14m-.5 15.5v-5.3a3.26 3.26 0 00-3.26-3.26c-.85 0-1.64.32-2.23.88v-.88h-2.5v9.5h2.5v-5.3c0-.8.65-1.45 1.45-1.45s1.45.65 1.45 1.45v5.3h2.5zM6.88 8.56a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM5.25 19.5h2.5v-9.5h-2.5v9.5z"/></svg>',
-            'zalo'      => '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.59 2 12.25c0 3.1 1.5 5.85 3.85 7.6L4 22l2.3-1.35c1.1.3 2.25.45 3.45.45 5.52 0 10-4.59 10-10.25S17.52 2 12 2zm3.5 8.5h-1.5v-1.5h1.5v1.5zm-7 0H7v-1.5h1.5v1.5z"/></svg>',
-            // Thêm mạng mới ở đây nếu muốn default
-        ]);
-
-        // Merge custom icons nếu truyền trực tiếp
-        if (!empty($custom_icons)) {
-            $icon_map = array_merge($icon_map, $custom_icons);
-        }
-
-        $output = '<ul class="' . esc_attr($wrapper_class) . '">';
-
-        foreach ($items as $item) {
-
-        }
-
-        $output .= '</ul>';
-        return $output;
     }
 
-    /** 
-     * =============================================== 
-     * SAGE REDIRECT LINK SYSTEM – 10/10 ULTIMATE PERFORMANCE
-     * Bulk prefetch + WP_Post object + native meta + max speed
-     * =============================================== 
-     */
 
     if (!function_exists('sage_prefetch_link_posts')) {
         /**
@@ -192,9 +145,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /** 
-     * Lấy thông tin link (array) 
-     */
     if (!function_exists('sage_post_link')) {
         function sage_post_link($post = 0, string $link_type = 'default'): array {
             static $cache = [];
@@ -260,9 +210,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /** 
-     * Helper sinh data attributes cho GTM 
-     */
     if (!function_exists('sage_link_data_attrs')) {
         function sage_link_data_attrs(array $link): string {
             return sprintf(
@@ -276,9 +223,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /** 
-     * Trả về toàn bộ thẻ <a> cho tiêu đề 
-     */
     if (!function_exists('sage_post_title_link')) {
         function sage_post_title_link($post = 0, string $extra_class = '', string $link_type = 'default'): string {
             $link  = sage_post_link($post, $link_type);
@@ -297,9 +241,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /** 
-     * Mở thẻ <a> bao quanh card/block 
-     */
     if (!function_exists('sage_post_link_open')) {
         function sage_post_link_open($post = 0, string $extra_classes = '', string $link_type = 'default'): string {
             $link = sage_post_link($post, $link_type);
@@ -313,18 +254,12 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /** 
-     * Đóng thẻ </a> 
-     */
     if (!function_exists('sage_post_link_close')) {
         function sage_post_link_close(): string {
             return '</a>';
         }
     }
 
-    /**
-     * LẤY FLAGS (giữ nguyên)
-     */
     if (!function_exists('sage_get_flags')) {
         function sage_get_flags($post): array
         {
@@ -335,9 +270,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * LẤY FLAG ƯU TIÊN NHẤT (chỉ 1 flag) – SIÊU NHANH
-     */
     if (!function_exists('sage_get_primary_flag')) {
         function sage_get_primary_flag($post): string
         {
@@ -377,9 +309,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * BADGE (chỉ hiển thị 1 cái)
-     */
     if (!function_exists('sage_flag_badge')) {
         function sage_flag_badge(string $flag): string
         {
@@ -415,10 +344,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * RENDER 1 CỘT FOOTER MENU – Tự động lấy tên menu làm tiêu đề
-     * ĐÃ FIX: wp_get_nav_menu_locations() → get_nav_menu_locations()
-     */
     if (!function_exists('sage_footer_column')) {
         function sage_footer_column(string $location, string $fallback_title = ''): string {
             // Kiểm tra menu có tồn tại không
@@ -458,10 +383,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * SAGE THUMBNAIL – SRCSET + PLACEHOLDER CHẮC CHẮN 100% (v3)
-     * Fix lỗi ảnh ghost + placeholder không hiện trong custom loop
-     */
     if (!function_exists('sage_thumbnail')) {
         function sage_thumbnail(string $size = 'thumb-medium', array $attr = [], $post = null): string
         {
@@ -491,11 +412,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }   
 
-    /**
-     * SAGE AUTHOR LINK – Hiển thị tên tác giả + link đến author archive
-     * Ưu tiên field 'custom_author' (từ CustomTableManager)
-     * Fallback về tác giả WP mặc định
-     */
     if (!function_exists('sage_post_author_link')) {
         function sage_post_author_link($post = null, string $extra_class = ''): string
         {
@@ -527,9 +443,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }    
 
-    /**
-     * SAGE POST DATE – Linh hoạt cho mọi vị trí (slide, grid, content.blade.php)
-     */
     if (!function_exists('sage_post_date')) {
         function sage_post_date($post = null, bool $use_modified = false, bool $raw = false, string $extra_class = ''): string
         {
@@ -562,12 +475,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * LẤY BANNER SIDEBAR WIDGET – ĐÃ CHỈNH SỬA THEO YÊU CẦU MỚI
-     * - Trang chủ          → Luôn Theme Options
-     * - Single Post/Event  → Taxonomy của bài viết → Theme Options
-     * - Archive Category   → Taxonomy → Theme Options
-     */
     if (!function_exists('sage_get_sidebar_banner')) {
         function sage_get_sidebar_banner(int $block = 1): string
         {
@@ -652,10 +559,6 @@ if (!function_exists('sage_social_icons')) {
         }
     }
 
-    /**
-     * LẤY CHÍNH XÁC TRƯỜNG EXCERPT THỦ CÔNG
-     * Hỗ trợ truyền: không truyền, ID, hoặc WP_Post object
-     */
     if (!function_exists('sage_excerpt')) {
         function sage_excerpt($post = null, bool $fallback_to_content = false, int $words = 55): string
         {
@@ -682,5 +585,154 @@ if (!function_exists('sage_social_icons')) {
             // Mặc định: không có excerpt thủ công thì trả về rỗng
             return '';
         }
+    }
+
+    if (!function_exists('sage_format_bds_price')) {
+        function sage_format_bds_price(float $price_vnd): string {
+            if ($price_vnd <= 0) {
+                return 'Liên hệ';
+            }
+
+            // 1 tỷ = 1_000_000_000
+            if ($price_vnd >= 1_000_000_000) {
+                $ty      = floor($price_vnd / 1_000_000_000);
+                $remainder = $price_vnd % 1_000_000_000;
+                $trieu   = floor($remainder / 1_000_000);
+
+                if ($trieu > 0) {
+                    return $ty . ' tỷ ' . $trieu . ' triệu';
+                }
+                return $ty . ' tỷ';
+            }
+
+            // Dưới 1 tỷ → hiển thị triệu
+            $trieu = floor($price_vnd / 1_000_000);
+            return $trieu . ' triệu';
+        }
+    }
+
+    if (!function_exists('sage_format_bds_area')) {
+        function sage_format_bds_area(float $area): string {
+            if ($area <= 0) {
+                return '—';
+            }
+            // Nếu là số nguyên thì không hiện .0
+            return (fmod($area, 1) == 0)
+                ? number_format($area, 0) . ' m²'
+                : number_format($area, 1) . ' m²';
+        }
+    }
+
+    if (!function_exists('sage_bds_info')) {
+        function sage_bds_info($post = null): array {
+            $post = get_post($post);
+            if (!$post) {
+                return ['price' => 'Liên hệ', 'area' => '—', 'location' => 'Chưa cập nhật', 'type' => ''];
+            }
+
+            static $cache = [];
+            $cacheKey = $post->ID;
+            if (isset($cache[$cacheKey])) {
+                return $cache[$cacheKey];
+            }
+
+            $pt   = $post->post_type;
+            $data = ['post_type' => $pt];
+
+            if ($pt === 'property-for-sale') {
+                $data['price']    = sage_format_bds_price((float) cmeta('price'));
+                $area             = cmeta('land_area') ?: cmeta('usable_area');
+                $data['area']     = sage_format_bds_area((float) $area);
+                $data['location'] = cmeta('address_detail') ?: 'Chưa cập nhật';
+
+                $type = cmeta('property_type');
+                $data['type'] = match($type) {
+                    'house'     => 'Nhà riêng',
+                    'apartment' => 'Căn hộ chung cư',
+                    'land'      => 'Đất thổ cư',
+                    default     => 'Bất động sản',
+                };
+
+            } elseif ($pt === 'property-for-rent') {
+                $rent = (int) cmeta('rent_monthly_rent');
+                $data['price'] = $rent >= 1000000
+                    ? number_format($rent / 1000000, 0) . ' triệu/tháng'
+                    : number_format($rent) . ' VNĐ/tháng';
+
+                $data['area']     = sage_format_bds_area((float) cmeta('rent_usable_area'));
+                $data['location'] = cmeta('rent_address_detail') ?: 'Chưa cập nhật';
+
+                $type = cmeta('rent_property_type');
+                $data['type'] = match($type) {
+                    'house'     => 'Nhà riêng',
+                    'apartment' => 'Căn hộ chung cư',
+                    'layout'    => 'Mặt bằng',
+                    default     => 'Cho thuê',
+                };
+            }
+
+            return $cache[$cacheKey] = $data;
+        }
+    }
+
+    if (!function_exists('sage_bds_get_gallery_ids')) {
+        function sage_bds_get_gallery_ids($post = null): array {
+            $post = get_post($post);
+            if (!$post) return [];
+
+            static $cache = [];
+            $key = $post->ID;
+            if (isset($cache[$key])) return $cache[$key];
+
+            $field = ($post->post_type === 'property-for-sale') 
+                ? 'property_images' 
+                : 'rent_property_images';
+
+            $ids = [];
+            if (function_exists('rwmb_meta')) {
+                $ids = rwmb_meta($field, [], $post->ID);          
+            } else {
+                $ids = get_post_meta($post->ID, $field, false);  
+            }
+
+            $ids = array_map('intval', (array) $ids);
+            $ids = array_values(array_filter($ids));   
+
+            return $cache[$key] = $ids;
+        }
+    }
+
+    if (!function_exists('sage_bds_gallery_count')) {
+        function sage_bds_gallery_count($post = null): int {
+            return count(sage_bds_get_gallery_ids($post));
+        }
+    }
+
+if (!function_exists('sage_bds_first_gallery_image')) {
+    function sage_bds_first_gallery_image(string $size = 'thumb-medium', array $attr = [], $post = null): string {
+        $post = get_post($post);
+        if (!$post) {
+            return '';
+        }
+
+        $field = ($post->post_type === 'property-for-sale') 
+            ? 'property_images' 
+            : 'rent_property_images';
+
+        $ids = get_post_meta($post->ID, $field, false);
+
+        $first_id = !empty($ids) ? (int) reset($ids) : 0;
+
+        if ($first_id > 0) {
+            $attr = wp_parse_args($attr, [
+                'class'    => 'thumbnail-avatar',
+                'loading'  => 'lazy',
+                'decoding' => 'async',
+                'alt'      => get_the_title($post) ?: 'Bất động sản',
+            ]);
+            return wp_get_attachment_image($first_id, $size, false, $attr);
+        }
+
+        return sage_thumbnail($size, $attr, $post);
     }
 }

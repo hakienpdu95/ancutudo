@@ -1,5 +1,5 @@
 @php 
-$query = \App\Queries\MergedPostsQuery::latest(8); 
+$query = \App\Queries\MergedPostsQuery::latest(8, ['property-for-sale']); 
 @endphp
 
 <div class="section-secondary" style="padding: 10px 0;">
@@ -25,7 +25,10 @@ $query = \App\Queries\MergedPostsQuery::latest(8);
             <div class="ui stackable grid posts-for-you-grid">
                 <input type="hidden" class="posts-for-you--url-redirect" data-url="/ban-nha-dat-toan-quoc">
                 @while ($query->have_posts())
-                @php $query->the_post(); @endphp
+                @php 
+                    $query->the_post(); 
+                    $info = sage_bds_info();
+                @endphp
                 <div class="four wide column homepage-view padding-0-mobile-home">
                     {!! sage_post_link_open(get_post(), 'black', 'post-ocop-home') !!}
                     {!! sage_post_link_close() !!}
@@ -35,18 +38,16 @@ $query = \App\Queries\MergedPostsQuery::latest(8);
                         <div class="ui card" style="margin:0;">
                             {!! sage_post_link_open(get_post(), 'black', 'post-ocop-home') !!}
                                 <div class="ui raised segment">
-                                    {!! sage_thumbnail('thumb-medium', [
-                                        'class' => 'thumbnail-avatar'
-                                    ], get_post()) !!}
-                                    <div class="post-media--overview">
-                                        <div class="align-items">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
-                                                <path fill="currentColor" d="M16 13.25A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75ZM1.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h.94l.03-.03l6.077-6.078a1.75 1.75 0 0 1 2.412-.06L14.5 10.31V2.75a.25.25 0 0 0-.25-.25Zm12.5 11a.25.25 0 0 0 .25-.25v-.917l-4.298-3.889a.25.25 0 0 0-.344.009L4.81 13.5ZM7 6a2 2 0 1 1-3.999.001A2 2 0 0 1 7 6M5.5 6a.5.5 0 1 0-1 0a.5.5 0 0 0 1 0"></path>
-                                            </svg>
-                                            <span>3</span>
-                                        </div>
+                                {!! sage_bds_first_gallery_image('thumb-medium', ['class' => 'thumbnail-avatar']) !!}
+                                <div class="post-media--overview">
+                                    <div class="align-items">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16">
+                                            <path fill="currentColor" d="M16 13.25A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75ZM1.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h.94l.03-.03l6.077-6.078a1.75 1.75 0 0 1 2.412-.06L14.5 10.31V2.75a.25.25 0 0 0-.25-.25Zm12.5 11a.25.25 0 0 0 .25-.25v-.917l-4.298-3.889a.25.25 0 0 0-.344.009L4.81 13.5ZM7 6a2 2 0 1 1-3.999.001A2 2 0 0 1 7 6M5.5 6a.5.5 0 1 0-1 0a.5.5 0 0 0 1 0"></path>
+                                        </svg>
+                                        <span>{!! sage_bds_gallery_count() !!}</span>
                                     </div>
                                 </div>
+                            </div>
                             {!! sage_post_link_close() !!}
                             <div class="content" style="border-top:0;text-align:left">
                                 {!! sage_post_link_open(get_post(), 'black', 'post-ocop-home') !!}
@@ -56,8 +57,8 @@ $query = \App\Queries\MergedPostsQuery::latest(8);
                                         </div>
                                     </div>
                                     <div class="meta row main-color text-primary-color" style="font-weight: bold; margin-top: 10px; display:flex; justify-content:space-between;">
-                                        <span class="text-truncate-1" style="margin-right: auto; font-size: 16px; font-weight: 500;"> 3,35 tỷ </span>
-                                        <span class="text-truncate-1" style=" font-size: 16px; font-weight: 500;"> 52 m² </span>
+                                        <span class="text-truncate-1" style="margin-right: auto; font-size: 16px; font-weight: 500;"> {!! $info['price'] !!} </span>
+                                        <span class="text-truncate-1" style=" font-size: 16px; font-weight: 500;"> {!! $info['area'] !!} </span>
                                     </div>
                                     <div class="row meta primary" style="font-weight:bold; margin-top: 10px;">
                                         <span style="font-size: 14px; font-weight: 500; display: flex; align-items: center;">
@@ -67,7 +68,7 @@ $query = \App\Queries\MergedPostsQuery::latest(8);
                                                     <path fill="#2859c5" d="M24 29a8 8 0 1 0 0-16a8 8 0 0 0 0 16"></path>
                                                 </g>
                                             </svg>
-                                            <span class="text-truncate-1 text-muted">Huyện Đông Anh, Hà Nội</span>
+                                            <span class="text-truncate-1 text-muted">{!! $info['location'] !!}</span>
                                         </span>
                                     </div>
                                 {!! sage_post_link_close() !!}

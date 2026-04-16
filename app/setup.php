@@ -357,10 +357,12 @@ require_once get_theme_file_path('app/Helpers/SMTPMailer.php');
 ]);
 
 \App\Database\CustomTableManager::register('property-for-sale', [
-    '*'
+    '*',
+    '-property_images'
 ]);
 \App\Database\CustomTableManager::register('property-for-rent', [
-    '*'
+    '*',
+    '-property_images'
 ]);
 
 // Nếu muốn bump TẤT CẢ meta cho 1 CPT nào đó (ví dụ test):
