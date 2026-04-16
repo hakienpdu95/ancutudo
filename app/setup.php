@@ -632,9 +632,9 @@ add_action('wp_ajax_nopriv_get_categories_by_tab', '\App\actd_get_categories_by_
 function actd_get_categories_by_tab() {
     $transaction = intval($_GET['transaction'] ?? 1);
     
-    $taxonomy = 'property-type';   
+    $taxonomy = 'property-category';   
 
-    $sale_ids = [4];  
+    $sale_ids = [3,4];  
     $rent_ids = [5];  
 
     $include = ($transaction === 2) ? $rent_ids : $sale_ids;
@@ -680,3 +680,74 @@ add_action('wp_head', function () {
     </script>
     <?php
 }, 1);
+
+// ====================== REGISTER QUERY VARS ======================
+add_filter('query_vars', function ($vars) {
+    $vars[] = 'province_code';
+    $vars[] = 'ward_code';
+    return $vars;
+});
+
+// ====================== FILTER LOCATION CHO CPT BĐS (EAV) ======================
+add_action('pre_get_posts', function ($query) {
+    if (is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    $post_type = $query->get('post_type');
+
+    // Chỉ áp dụng cho 2 CPT bất động sản của bạn
+    if (!in_array($post_type, ['property-for-sale', 'property-for-rent'])) {
+        return;
+    }
+
+    $province_code = $query->get('province_code') ?: sanitize_text_field($_GET['province_code'] ?? '');
+    $ward_code     = $query->get('ward_code')     ?: sanitize_text_field($_GET['ward_code'] ?? '');
+
+    if (empty($province_code) && empty($ward_code)) {
+        return;
+    }
+
+    global $wpdb;
+
+    // Tên bảng EAV theo CPT
+    $meta_table = ($post_type === 'property-for-sale')
+        ? $wpdb->prefix . 'property_for_sale_meta'
+        : $wpdb->prefix . 'property_for_rent_meta';
+
+    // 1. JOIN bảng EAV
+    add_filter('posts_join', function ($join) use ($wpdb, $meta_table) {
+        static $done = false;
+        if ($done) return $join;
+        $done = true;
+
+        $join .= " INNER JOIN `{$meta_table}` AS `meta_loc` ON {$wpdb->posts}.ID = meta_loc.post_id ";
+        return $join;
+    }, 10, 1);
+
+    // 2. WHERE condition (province_code HOẶC ward_code)
+    add_filter('posts_where', function ($where) use ($province_code, $ward_code, $wpdb) {
+        static $done = false;
+        if ($done) return $where;
+        $done = true;
+
+        $conditions = [];
+
+        if ($province_code) {
+            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'province_code' AND meta_loc.meta_value = %s", $province_code);
+        }
+
+        if ($ward_code) {
+            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'ward_code' AND meta_loc.meta_value = %s", $ward_code);
+        }
+
+        if (!empty($conditions)) {
+            $where .= " AND (" . implode(' AND ', $conditions) . ")";
+        }
+
+        return $where;
+    }, 10, 1);
+
+    // 3. GROUP BY tránh duplicate khi join
+    $query->set('groupby', "{$wpdb->posts}.ID");
+});
