@@ -235,3 +235,17 @@ define('SMTP_USERNAME', 'dohakien395@gmail.com');
 define('SMTP_PASSWORD', 'ufjv zdot nsmu mfhm');      
 define('SMTP_FROM',     'dohakien395@gmail.com');          
 define('SMTP_FROM_NAME', 'vigiadinhcomvn');        
+
+-- Cho bảng mua bán
+ALTER TABLE wp_property_for_sale_meta 
+ADD INDEX idx_province (meta_key, meta_value, post_id);
+
+ALTER TABLE wp_property_for_sale_meta 
+ADD INDEX idx_ward (meta_key, meta_value, post_id);
+
+-- Cho bảng cho thuê
+ALTER TABLE wp_property_for_rent_meta 
+ADD INDEX idx_province (meta_key, meta_value, post_id);
+
+ALTER TABLE wp_property_for_rent_meta 
+ADD INDEX idx_ward (meta_key, meta_value, post_id);
