@@ -634,7 +634,7 @@ function actd_get_categories_by_tab() {
     
     $taxonomy = 'property-category';   
 
-    $sale_ids = [3,4];  
+    $sale_ids = [7,8];  
     $rent_ids = [5];  
 
     $include = ($transaction === 2) ? $rent_ids : $sale_ids;
@@ -688,20 +688,102 @@ add_filter('query_vars', function ($vars) {
     return $vars;
 });
 
+// add_action('init', function () {
+//     add_rewrite_rule(
+//         '^nha-dat-ban/([^/]+)/?$',
+//         'index.php?post_type=property-for-sale&property-category=$matches[1]',
+//         'top'
+//     );
+//     add_rewrite_rule(
+//         '^nha-dat-thue/([^/]+)/?$',
+//         'index.php?post_type=property-for-rent&property-category=$matches[1]',
+//         'top'
+//     );
+// }, 10);
+
+// ====================== REWRITE RULE (giữ nguyên) ======================
 add_action('init', function () {
-    // Tạo rewrite rule cho 2 CPT
-    add_rewrite_rule(
-        '^nha-dat-ban/([^/]+)/?$',
-        'index.php?post_type=property-for-sale&property-category=$matches[1]',
-        'top'
-    );
-    add_rewrite_rule(
-        '^nha-dat-thue/([^/]+)/?$',
-        'index.php?post_type=property-for-rent&property-category=$matches[1]',
-        'top'
-    );
+    add_rewrite_rule('^nha-dat-ban/([^/]+)/?$', 'index.php?post_type=property-for-sale&property-category=$matches[1]', 'top');
+    add_rewrite_rule('^nha-dat-thue/([^/]+)/?$', 'index.php?post_type=property-for-rent&property-category=$matches[1]', 'top');
 }, 10);
 
+// ====================== FILTER CHÍNH – CHẠY SAU TẤT CẢ (FIX 0=1) ======================
+add_filter('posts_clauses', function ($clauses, $query) {
+    if (is_admin() || !$query->is_main_query()) {
+        return $clauses;
+    }
+
+    $post_type = $query->get('post_type');
+    if (!in_array($post_type, ['property-for-sale', 'property-for-rent'])) {
+        return $clauses;
+    }
+
+    global $wpdb;
+
+    $province_code = sanitize_text_field($query->get('province_code') ?: ($_GET['province_code'] ?? ''));
+    $ward_code     = sanitize_text_field($query->get('ward_code')     ?: ($_GET['ward_code'] ?? ''));
+    $term_slug     = sanitize_text_field($query->get('property-category') ?: ($_GET['property-category'] ?? ''));
+
+    $meta_table = ($post_type === 'property-for-sale')
+        ? $wpdb->prefix . 'property_for_sale_meta'
+        : $wpdb->prefix . 'property_for_rent_meta';
+
+    // ==================== 1. JOIN EAV (nếu có lọc tỉnh/phường) ====================
+    if ($province_code || $ward_code) {
+        $clauses['join'] .= " INNER JOIN `{$meta_table}` AS `meta_loc` ON {$wpdb->posts}.ID = meta_loc.post_id ";
+    }
+
+    // ==================== 2. XỬ LÝ WHERE – XÓA "0 = 1" + THÊM ĐIỀU KIỆN ====================
+    $where = $clauses['where'];
+
+    // Xóa sạch mọi "AND (0 = 1)" hoặc "AND 0=1" do module khác inject
+    $where = preg_replace('/\s*AND\s*\(\s*0\s*=\s*1\s*\)/i', '', $where);
+    $where = preg_replace('/\s*AND\s*0\s*=\s*1/i', '', $where);
+    $where = trim($where);
+
+    $conditions = [];
+
+    // Filter theo loại hình (property-category)
+    if ($term_slug) {
+        $conditions[] = $wpdb->prepare("
+            EXISTS (
+                SELECT 1 
+                FROM {$wpdb->term_relationships} tr
+                INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+                WHERE tr.object_id = {$wpdb->posts}.ID 
+                  AND tt.taxonomy = 'property-category'
+                  AND t.slug = %s
+            )", $term_slug);
+    }
+
+    // Filter theo tỉnh / phường (EAV)
+    if ($province_code || $ward_code) {
+        if ($province_code) {
+            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'province_code' AND meta_loc.meta_value = %s", $province_code);
+        }
+        if ($ward_code) {
+            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'ward_code' AND meta_loc.meta_value = %s", $ward_code);
+        }
+    }
+
+    if (!empty($conditions)) {
+        $extra = " AND (" . implode(" AND ", $conditions) . ")";
+        $where .= $extra;
+    }
+
+    $clauses['where']   = $where;
+    $clauses['groupby'] = "{$wpdb->posts}.ID";
+
+    // ==================== DEBUG (bật WP_DEBUG = true) ====================
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log("[BDS FINAL DEBUG] Post Type: {$post_type} | Prov: {$province_code} | Ward: {$ward_code} | Term: {$term_slug}");
+        error_log("[FINAL WHERE] " . $clauses['where']);
+        error_log("[FINAL JOIN]  " . $clauses['join']);
+    }
+
+    return $clauses;
+}, 999, 2);   // priority 999 = chạy sau tất cả filter khác
 // ====================== FILTER LOCATION CHO CPT BĐS (EAV) ======================
 add_action('pre_get_posts', function ($query) {
     if (is_admin() || !$query->is_main_query()) {
