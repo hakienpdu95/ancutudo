@@ -681,7 +681,6 @@ add_action('wp_head', function () {
     <?php
 }, 1);
 
-// ====================== REGISTER QUERY VARS ======================
 add_filter('query_vars', function ($vars) {
     $vars[] = 'province_code';
     $vars[] = 'ward_code';
@@ -689,23 +688,95 @@ add_filter('query_vars', function ($vars) {
     return $vars;
 });
 
-// add_action('init', function () {
-//     add_rewrite_rule(
-//         '^nha-dat-ban/([^/]+)/?$',
-//         'index.php?post_type=property-for-sale&property-category=$matches[1]',
-//         'top'
-//     );
-//     add_rewrite_rule(
-//         '^nha-dat-thue/([^/]+)/?$',
-//         'index.php?post_type=property-for-rent&property-category=$matches[1]',
-//         'top'
-//     );
-// }, 10);
-
 add_action('init', function () {
     add_rewrite_rule('^nha-dat-ban/([^/]+)/?$', 'index.php?post_type=property-for-sale&property-category=$matches[1]', 'top');
     add_rewrite_rule('^nha-dat-thue/([^/]+)/?$', 'index.php?post_type=property-for-rent&property-category=$matches[1]', 'top');
 }, 10);
+
+// add_filter('posts_clauses', function ($clauses, $query) {
+//     if (is_admin() || !$query->is_main_query()) {
+//         return $clauses;
+//     }
+
+//     $post_type = $query->get('post_type');
+//     if (!in_array($post_type, ['property-for-sale', 'property-for-rent'])) {
+//         return $clauses;
+//     }
+
+//     global $wpdb;
+
+//     $province_code = sanitize_text_field($query->get('province_code') ?: ($_GET['province_code'] ?? ''));
+//     $ward_code     = sanitize_text_field($query->get('ward_code')     ?: ($_GET['ward_code'] ?? ''));
+
+//     $meta_table = ($post_type === 'property-for-sale')
+//         ? $wpdb->prefix . 'property_for_sale_meta'
+//         : $wpdb->prefix . 'property_for_rent_meta';
+
+//     // ==================== DEBUG INPUT ====================
+//     if (defined('WP_DEBUG') && WP_DEBUG) {
+//         $term_slug = sanitize_text_field($query->get('property-category') ?: ($_GET['property-category'] ?? ''));
+//         error_log("[BDS FINAL DEBUG INPUT] PT: {$post_type} | Prov: {$province_code} | Ward: {$ward_code} | Term: {$term_slug}");
+//         error_log("[ORIGINAL WHERE] " . $clauses['where']);
+//     }
+
+//     $where = $clauses['where'];
+//     $where = preg_replace('/\s*AND\s*\(\s*0\s*=\s*1\s*\)/i', '', $where);
+//     $where = preg_replace('/\s*AND\s*0\s*=\s*1/i', '', $where);
+//     $where = trim($where);
+
+//     if ($province_code || $ward_code) {
+//         // Tránh duplicate JOIN
+//         if (strpos($clauses['join'], 'meta_loc') === false) {
+//             $clauses['join'] .= " INNER JOIN `{$meta_table}` AS `meta_loc` ON {$wpdb->posts}.ID = meta_loc.post_id ";
+//         }
+
+//         $conditions = [];
+//         if ($province_code) {
+//             $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'province_code' AND meta_loc.meta_value = %s", $province_code);
+//         }
+//         if ($ward_code) {
+//             $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'ward_code' AND meta_loc.meta_value = %s", $ward_code);
+//         }
+
+//         if (!empty($conditions)) {
+//             $where .= " AND (" . implode(" AND ", $conditions) . ")";
+//         }
+//     }
+
+//     $clauses['where']   = $where;
+//     $clauses['groupby'] = "{$wpdb->posts}.ID";
+
+//     // ==================== DEBUG FINAL ====================
+//     if (defined('WP_DEBUG') && WP_DEBUG) {
+//         error_log("[BDS FINAL DEBUG WHERE] " . $clauses['where']);
+//         error_log("[BDS FINAL DEBUG JOIN]  " . $clauses['join']);
+//     }
+
+//     return $clauses;
+// }, 999, 2);
+
+function bds_build_eav_conditions($post_type, $province_code, $ward_code) {
+    global $wpdb;
+    $conditions = [];
+
+    if ($province_code) {
+        $conditions[] = $wpdb->prepare(
+            "meta_loc.meta_key = 'province_code' AND meta_loc.meta_value = %s",
+            $province_code
+        );
+    }
+    if ($ward_code) {
+        $conditions[] = $wpdb->prepare(
+            "meta_loc.meta_key = 'ward_code' AND meta_loc.meta_value = %s",
+            $ward_code
+        );
+    }
+
+    // ── Mở rộng sau này chỉ cần thêm vào đây ──
+    // if ($price_min) $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'price' AND meta_loc.meta_value >= %d", $price_min);
+
+    return $conditions;
+}
 
 add_filter('posts_clauses', function ($clauses, $query) {
     if (is_admin() || !$query->is_main_query()) {
@@ -729,33 +800,31 @@ add_filter('posts_clauses', function ($clauses, $query) {
     // ==================== DEBUG INPUT ====================
     if (defined('WP_DEBUG') && WP_DEBUG) {
         $term_slug = sanitize_text_field($query->get('property-category') ?: ($_GET['property-category'] ?? ''));
-        error_log("[BDS FINAL DEBUG INPUT] PT: {$post_type} | Prov: {$province_code} | Ward: {$ward_code} | Term: {$term_slug}");
+        error_log("[BDS 10/10 INPUT] PT: {$post_type} | Prov: {$province_code} | Ward: {$ward_code} | Term: {$term_slug}");
         error_log("[ORIGINAL WHERE] " . $clauses['where']);
     }
 
-    // XÓA TRIỆT ĐỂ "AND (0 = 1)" từ CustomTableManager
+    // ==================== CLEAN (0 = 1) TRIỆT ĐỂ ====================
     $where = $clauses['where'];
-    $where = preg_replace('/\s*AND\s*\(\s*0\s*=\s*1\s*\)/i', '', $where);
-    $where = preg_replace('/\s*AND\s*0\s*=\s*1/i', '', $where);
+    $where = preg_replace('/\s*AND\s*\(\s*0\s*=\s*1\s*\)\s*/i', ' ', $where);
+    $where = preg_replace('/\s*AND\s*0\s*=\s*1\s*/i', ' ', $where);
+    $where = str_replace(['AND (0 = 1)', 'AND 0=1', '(0 = 1)', '0=1'], '', $where);
     $where = trim($where);
 
-    // ==================== CHỈ XỬ LÝ LOCATION (KHÔNG THÊM EXISTS NỮA) ====================
+    // ==================== FILTER LOCATION (EAV) – FIX DUPLICATE ====================
     if ($province_code || $ward_code) {
         // Tránh duplicate JOIN
         if (strpos($clauses['join'], 'meta_loc') === false) {
             $clauses['join'] .= " INNER JOIN `{$meta_table}` AS `meta_loc` ON {$wpdb->posts}.ID = meta_loc.post_id ";
         }
 
-        $conditions = [];
-        if ($province_code) {
-            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'province_code' AND meta_loc.meta_value = %s", $province_code);
-        }
-        if ($ward_code) {
-            $conditions[] = $wpdb->prepare("meta_loc.meta_key = 'ward_code' AND meta_loc.meta_value = %s", $ward_code);
-        }
+        $conditions = bds_build_eav_conditions($post_type, $province_code, $ward_code);
 
-        if (!empty($conditions)) {
-            $where .= " AND (" . implode(" AND ", $conditions) . ")";
+        // Tránh duplicate condition
+        foreach ($conditions as $cond) {
+            if (strpos($where, $cond) === false) {
+                $where .= " AND (" . $cond . ")";
+            }
         }
     }
 
@@ -764,8 +833,8 @@ add_filter('posts_clauses', function ($clauses, $query) {
 
     // ==================== DEBUG FINAL ====================
     if (defined('WP_DEBUG') && WP_DEBUG) {
-        error_log("[BDS FINAL DEBUG WHERE] " . $clauses['where']);
-        error_log("[BDS FINAL DEBUG JOIN]  " . $clauses['join']);
+        error_log("[BDS 10/10 FINAL WHERE] " . $clauses['where']);
+        error_log("[BDS 10/10 JOIN] " . $clauses['join']);
     }
 
     return $clauses;
